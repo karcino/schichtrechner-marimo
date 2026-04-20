@@ -372,7 +372,9 @@ def _(berechne_netto, berechne_schicht, ende, entgelt,
 @app.cell(hide_code=True)
 def _(ergebnis, mo, steuer):
     if ergebnis is None:
-        mo.md("> Eingabe unvollstaendig oder ungueltig — bitte Beginn/Ende im Format HH:MM.").callout(kind="warn")
+        _ausgabe = mo.md(
+            "> Eingabe unvollstaendig oder ungueltig — bitte Beginn/Ende im Format HH:MM."
+        ).callout(kind="warn")
     else:
         e = ergebnis
         rows = ""
@@ -411,7 +413,7 @@ def _(ergebnis, mo, steuer):
             if steuer["soli"] > 0:
                 abzuege += f"| Solidaritaetszuschlag (5,5 %) | -{steuer['soli']:.2f} EUR |\n"
 
-        mo.md(f"""
+        _ausgabe = mo.md(f"""
 ## Ergebnis
 
 | Schichtdauer | Fahrtzeit | Bezahlt |
@@ -433,6 +435,7 @@ def _(ergebnis, mo, steuer):
 {netto_zeile}
 | Effektiver Stundenlohn (brutto) | {e['brutto'] / max(e['bezahlt_total_h'], 0.01):.2f} EUR/h |
 """)
+    _ausgabe
     return
 
 
