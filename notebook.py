@@ -329,20 +329,31 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(ende, fahrtzeit, kurzfristig, mo, start, tag):
-    mo.md("## Schicht eingeben")
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        # 🧮 Schicht-Rechner
+
+        **Trage deine Schicht unten ein — das Ergebnis erscheint automatisch darunter.**
+        """
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(ende, fahrtzeit, kurzfristig, mo, start, tag):
-    mo.hstack(
-        [
-            mo.vstack([tag, start, kurzfristig]),
-            mo.vstack([fahrtzeit, ende]),
-        ],
-        justify="start",
-        gap=2,
+    mo.callout(
+        mo.hstack(
+            [
+                mo.vstack([tag, start, kurzfristig], gap=1),
+                mo.vstack([fahrtzeit, ende], gap=1),
+            ],
+            justify="start",
+            gap=2,
+        ),
+        kind="info",
     )
     return
 
@@ -372,7 +383,9 @@ def _(berechne_netto, berechne_schicht, ende, entgelt,
 @app.cell(hide_code=True)
 def _(ergebnis, mo, steuer):
     if ergebnis is None:
-        mo.md("> Eingabe unvollstaendig oder ungueltig — bitte Beginn/Ende im Format HH:MM.").callout(kind="warn")
+        _ausgabe = mo.md(
+            "> Eingabe unvollstaendig oder ungueltig — bitte Beginn/Ende im Format HH:MM."
+        ).callout(kind="warn")
     else:
         e = ergebnis
         rows = ""
@@ -411,7 +424,7 @@ def _(ergebnis, mo, steuer):
             if steuer["soli"] > 0:
                 abzuege += f"| Solidaritaetszuschlag (5,5 %) | -{steuer['soli']:.2f} EUR |\n"
 
-        mo.md(f"""
+        _ausgabe = mo.md(f"""
 ## Ergebnis
 
 | Schichtdauer | Fahrtzeit | Bezahlt |
@@ -433,20 +446,31 @@ def _(ergebnis, mo, steuer):
 {netto_zeile}
 | Effektiver Stundenlohn (brutto) | {e['brutto'] / max(e['bezahlt_total_h'], 0.01):.2f} EUR/h |
 """)
+    _ausgabe
     return
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Dokumentation
+# Dokumentation (einklappbar)
 # ─────────────────────────────────────────────────────────────────────────────
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+        ---
+
+        ## 📚 Dokumentation & Quellen
+
+        *Klicke eine Sektion an, um die Details einzublenden.*
+        """
+    )
+    return
+
+
 @app.cell(hide_code=True)
 def _(entgelt, mo):
     z = entgelt["zuschlaege"]
-    mo.md(f"""
----
-
-## Rechtliche Grundlage
-
+    _rechtliche_grundlage = mo.md(f"""
 **Haustarifvertrag** (HTV) persoenliche Assistenz vom 5. Maerz 2020,
 inkl. 2. AenderungsTV gueltig ab 1. Oktober 2023.
 
@@ -468,12 +492,8 @@ Vereinte Dienstleistungsgewerkschaft, Landesbezirk Berlin-Brandenburg.
 | Wechselschichtzulage | 0,63 EUR/h | § 7 Abs. 5, max 105 EUR/Monat |
 | Organisationszulage | 0,20 EUR/h | § 7 Abs. 7, kein Limit |
 """)
-    return
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
+    _paragraphen = mo.md(r"""
 ### § 7 HTV — Ausgleich fuer Sonderformen der Arbeit (Wortlaut)
 
 > **(1)** Beschaeftigte erhalten neben dem Entgelt fuer die tatsaechliche Arbeitsleistung
@@ -545,16 +565,8 @@ Fahrtzeit mit 125 % (= Grundlohn + KV-Zuschlag) verguetet (Lohnart 277).
 
 Diese Punkte koennen das tatsaechliche Brutto um einige Euro verschieben.
 """)
-    return
 
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
----
-
-### Quellen
-
+    _quellen = mo.md(r"""
 - **HTV** vom 5. Maerz 2020, inkl. 2. AenderungsTV gueltig ab 1. Oktober 2023
   (nicht oeffentlich verfuegbar)
 - **Anlage C** — Entgelttabelle gueltig ab Februar 2025
@@ -570,6 +582,15 @@ def _(mo):
 Inoffizielle Implementation. Keine Rechtsberatung. Im Zweifel gilt die offizielle
 Gehaltsabrechnung. Bei Abweichungen zuerst mit der Personalabteilung klaeren.
 """)
+
+    _akkordeon = mo.accordion(
+        {
+            "⚖️  Rechtliche Grundlage & Entgelt-Saetze": _rechtliche_grundlage,
+            "📜 § 7 HTV — Paragraphen im Wortlaut": _paragraphen,
+            "🔗 Quellen & Disclaimer": _quellen,
+        }
+    )
+    _akkordeon
     return
 
 
