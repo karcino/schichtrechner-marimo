@@ -306,20 +306,51 @@ def _parse_hhmm(s: str):
     return s  # invalid, caller handles
 
 
+def _parse_zeit_range(s: str):
+    """'HH:MM-HH:MM' / 'HH:MM – HH:MM' in (beginn, ende) splitten."""
+    if s is None:
+        return None, None
+    # Gaengige Bindestrich-Varianten normalisieren
+    for dash in ("–", "—", "−", "‐", "-"):
+        if dash in s:
+            parts = s.split(dash, 1)
+            if len(parts) == 2:
+                return parts[0].strip(), parts[1].strip()
+    return None, None
+
+
+def _parse_typ_to_kv(typ) -> bool:
+    """`Typ`-Spalte -> KV-Flag. Nur explizites 'kurzfristig'/'kv' setzt KV."""
+    if typ is None:
+        return False
+    t = str(typ).strip().lower()
+    return "kurzfristig" in t or t in ("kv", "kurz")
+
+
 def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
     """Parst einen Schichtplaner-CSV in eine Liste von Schicht-Dicts.
 
     Erwartete Spalten (Header-Namen case-insensitive, Reihenfolge egal):
-      Pflicht:  `beginn` und `ende` (HH:MM)
-      Tag: entweder `datum` (YYYY-MM-DD, DD.MM.YYYY, ...) oder `tag` (Mo, Di, ...)
-      Optional: `kurzfristig` / `kv`   (true/false, ja/nein, 1/0)
-      Optional: `fahrtzeit` / `fahrt`  (Stunden, Default 0)
+
+    **Zeit** — entweder getrennt oder kombiniert:
+      - `beginn` und `ende` (HH:MM)  — oder
+      - `zeit` / `time`              — Format `HH:MM-HH:MM` (mit -, –, — als Trenner)
+
+    **Tag** — entweder:
+      - `datum` / `date`             — YYYY-MM-DD, DD.MM.YYYY, ... (Wochentag abgeleitet) — oder
+      - `tag` / `wt` / `wochentag`   — Mo, Di, ..., Feiertag
+
+    **KV** (optional) — entweder:
+      - `kurzfristig` / `kv`         — true/false, ja/nein, 1/0 — oder
+      - `typ` / `type` / `art`       — "kurzfristig" setzt KV, alles andere nicht
+
+    **Fahrtzeit** (optional):
+      - `fahrtzeit` / `fahrt`        — Stunden (Default 0)
 
     Trennzeichen wird automatisch erkannt (`,` oder `;`).
 
     Rueckgabe: (schichten, fehler) — fehler ist eine Liste von Fehler-Meldungen.
     """
-    # Auto-Detect Separator
     sample = text[:2048]
     delim = ";" if sample.count(";") > sample.count(",") else ","
 
@@ -331,7 +362,6 @@ def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
     if not reader.fieldnames:
         return [], ["Kein Header gefunden — erste Zeile muss Spaltennamen enthalten."]
 
-    # Header normalisieren
     norm = {h: h.strip().lower() for h in reader.fieldnames}
 
     def col(row, *names):
@@ -344,14 +374,20 @@ def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
 
     schichten = []
     fehler = []
-    for i, row in enumerate(reader, start=2):  # start=2: Zeile 1 ist Header
+    for i, row in enumerate(reader, start=2):
         datum_raw = col(row, "datum", "date")
-        tag_raw = col(row, "tag", "wochentag", "day")
+        tag_raw = col(row, "tag", "wt", "wochentag", "day")
         beginn = col(row, "beginn", "start", "von", "from")
         ende = col(row, "ende", "end", "bis", "to")
+        zeit_raw = col(row, "zeit", "time", "uhrzeit")
+        typ_raw = col(row, "typ", "type", "art")
+
+        # Falls beginn/ende fehlen, aus `zeit` ableiten
+        if (not beginn or not ende) and zeit_raw:
+            beginn, ende = _parse_zeit_range(str(zeit_raw))
 
         if not beginn or not ende:
-            fehler.append(f"Zeile {i}: `beginn` und `ende` sind Pflicht.")
+            fehler.append(f"Zeile {i}: Zeit fehlt — entweder `beginn`+`ende` oder `zeit` (HH:MM-HH:MM).")
             continue
 
         tag = None
@@ -371,11 +407,18 @@ def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
             fehler.append(f"Zeile {i}: Entweder `datum` oder `tag` muss gesetzt sein.")
             continue
 
+        # KV: explizite Spalte hat Vorrang, sonst aus `typ`
+        kv_raw = col(row, "kurzfristig", "kv")
+        if kv_raw is not None:
+            kurzfristig = _parse_bool(kv_raw)
+        else:
+            kurzfristig = _parse_typ_to_kv(typ_raw)
+
         schichten.append({
             "tag": tag,
             "start": _parse_hhmm(str(beginn)),
             "ende": _parse_hhmm(str(ende)),
-            "kurzfristig": _parse_bool(col(row, "kurzfristig", "kv")),
+            "kurzfristig": kurzfristig,
             "fahrtzeit": _parse_float(col(row, "fahrtzeit", "fahrt", "travel"), default=0.0),
         })
 
