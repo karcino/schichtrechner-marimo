@@ -1,6 +1,6 @@
-"""Schichtrechner ambulante dienste e.V. — marimo notebook.
+"""HTV-Schichtrechner — marimo notebook.
 
-Reactive Lohn-Rechner fuer eine einzelne Schicht nach HTV ambulante dienste e.V.
+Reaktiver Lohn-Rechner fuer eine einzelne Schicht nach HTV persoenliche Assistenz.
 Basis: § 7 HTV (Ausgleich fuer Sonderformen der Arbeit) + Anlage C (EG 5 Stufe 3
 = 19,90 EUR/h als Zuschlags-Bemessungsgrundlage).
 
@@ -522,8 +522,8 @@ def _(mo):
 
 ### KV-Zuschlag (Kurzfristige Vermittlung)
 
-Laut Abrechnung ambulante dienste Lohnart **475**: **25 % des Grundlohns** als Zuschlag
-fuer kurzfristig vermittelte Schichten. Bei Kurzfristig-Einsaetzen wird auch die
+Laut Lohnabrechnung (Lohnart **475**): **25 % des Grundlohns** als Zuschlag fuer
+kurzfristig vermittelte Schichten. Bei Kurzfristig-Einsaetzen wird auch die
 Fahrtzeit mit 125 % (= Grundlohn + KV-Zuschlag) verguetet (Lohnart 277).
 
 ### Lohnsteuer & Sozialversicherung (2026)
@@ -555,8 +555,8 @@ def _(mo):
 
 ### Quellen
 
-- **HTV ambulante dienste e.V.** vom 5. Maerz 2020, inkl. 2. AenderungsTV gueltig ab 1. Oktober 2023
-  — Datei: `HTV-inkl.-AenderungsTV-2024.pdf` (nicht public)
+- **HTV** vom 5. Maerz 2020, inkl. 2. AenderungsTV gueltig ab 1. Oktober 2023
+  (nicht oeffentlich verfuegbar)
 - **Anlage C** — Entgelttabelle gueltig ab Februar 2025
   — Datei: `Anlage-C-allg.-Tabellenentgelt_ab-Feb-2025-bis-Okt-2025.pdf` (nicht public)
 - **BMF Programmablaufplan 2026 (PAP 2026)** — [bundesfinanzministerium.de](https://www.bundesfinanzministerium.de/Content/DE/Downloads/Steuern/Steuerarten/Lohnsteuer/Programmablaufplan/)
