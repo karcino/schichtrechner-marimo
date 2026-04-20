@@ -8,5 +8,12 @@ dependencies = [
     "marimo>=0.16.0",
 ]
 
+[project.optional-dependencies]
+# Nur fuer notebook_abgleich.py (lokale Pipeline — nicht im WASM-Build).
+abgleich = [
+    "pdfplumber>=0.11",
+    "pandas>=2.2",
+]
+
 [tool.uv]
 dev-dependencies = []

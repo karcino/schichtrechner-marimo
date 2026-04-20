@@ -18,6 +18,9 @@ dist/
 build/
 _build/
 
+# Abgleich-Pipeline: lokale Mail-Entwuerfe
+outbox/
+
 # IDE
 .vscode/
 .idea/

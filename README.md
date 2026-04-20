@@ -4,12 +4,15 @@ Schichtlohn-Rechner als [marimo](https://marimo.io)-Notebook.
 Berechnet Brutto und Netto nach **§ 7 HTV** (Haustarifvertrag persönliche Assistenz)
 für **Entgeltgruppe 5, Erfahrungsstufe 2**.
 
-Zwei Varianten:
+Drei Varianten:
 
 - **Einzel-Rechner** (`notebook.py` → Pages `/`) — eine Schicht eingeben, Brutto + Netto sehen.
 - **Monats-Rechner** (`notebook_monat.py` → Pages `/monat/`) — komplette Monatsabrechnung simulieren
   mit mehreren Schichten, CSV-Import aus Schichtplaner-Apps, gecappter Wechselschichtzulage
   (§ 7 Abs. 5: max 105 EUR/Monat) und exaktem Monats-Netto.
+- **Abgleich-Pipeline** (`notebook_abgleich.py`, nur lokal) — Skeleton, das eigene CSV,
+  DATEV-PDF und AG-Schichtenliste (PDF) einliest, Differenzen auswertet und
+  `.eml`-Mail-Entwuerfe schreibt. Nicht WASM-faehig.
 
 Gemeinsame Berechnungslogik liegt in `htv_calc.py` und wird beim WASM-Build per `build_wasm.py`
 in beide Notebooks inlined (Pyodide importiert keine externen Python-Dateien).
@@ -38,6 +41,19 @@ uv run marimo edit notebook.py
 # Als App ausführen (ohne Code)
 uv run marimo run notebook.py
 ```
+
+### Abgleich-Pipeline (lokal, mit PDF-Parsing)
+
+```bash
+# Zusaetzliche Deps installieren (pdfplumber, pandas)
+uv sync --extra abgleich
+
+# Pipeline-Notebook editieren
+uv run marimo edit notebook_abgleich.py
+```
+
+Erzeugte Mail-Entwuerfe landen als `.eml` in `outbox/` — manuell in
+Outlook/Thunderbird oeffnen und versenden.
 
 Falls uv noch nicht installiert ist: https://docs.astral.sh/uv/getting-started/installation/
 
