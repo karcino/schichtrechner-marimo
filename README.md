@@ -1,10 +1,10 @@
-# Schichtrechner — ambulante dienste e.V.
+# HTV-Schichtrechner
 
-HTV-konformer Schichtlohn-Rechner als [marimo](https://marimo.io)-Notebook.
-Berechnet Brutto und Netto einer einzelnen Schicht nach **§ 7 HTV** (Haustarifvertrag
-der ambulante dienste e.V.) für **Entgeltgruppe 5, Erfahrungsstufe 2**.
+Schichtlohn-Rechner als [marimo](https://marimo.io)-Notebook.
+Berechnet Brutto und Netto einer einzelnen Schicht nach **§ 7 HTV**
+(Haustarifvertrag persönliche Assistenz) für **Entgeltgruppe 5, Erfahrungsstufe 2**.
 
-**Live:** https://karcino.github.io/schichtrechner-marimo (nach erstem Deploy)
+Live via GitHub Pages — Python läuft als WebAssembly direkt im Browser, kein Server.
 
 ## Features
 
@@ -46,16 +46,15 @@ ausgeführt.
 Die Datei `.github/workflows/deploy.yml` deployt bei jedem Push auf `main`
 automatisch nach GitHub Pages. Vor dem ersten Deploy:
 
-1. Repo erstellen: `gh repo create karcino/schichtrechner-marimo --public --source=. --remote=origin`
-2. Push: `git push -u origin main`
-3. In **Settings → Pages** den Source auf **"GitHub Actions"** umstellen.
-4. Workflow läuft automatisch beim nächsten Push.
+1. Repo anlegen und pushen.
+2. In **Settings → Pages** den Source auf **"GitHub Actions"** umstellen.
+3. Workflow läuft automatisch beim nächsten Push.
 
 ## Rechtliche Grundlage
 
 Dieser Rechner basiert auf:
 
-- **Haustarifvertrag ambulante dienste e.V.** vom 5. März 2020, inkl. 2. ÄnderungsTV
+- **Haustarifvertrag (HTV) persönliche Assistenz** vom 5. März 2020, inkl. 2. ÄnderungsTV
   gültig ab 1. Oktober 2023 (§ 5, § 6 Abs. 5, § 7)
 - **Anlage C** zum HTV — Entgelttabelle gültig ab Februar 2025
 - **BMF Programmablaufplan 2026 (PAP 2026)** für Lohnsteuer nach § 32a EStG
@@ -65,9 +64,8 @@ Vollständige Quellen und Zitate sind im Notebook dokumentiert.
 
 ## Disclaimer
 
-Inoffizielle Re-Implementation durch einen Beschäftigten. Keine Rechtsberatung.
-Im Zweifel gilt die offizielle Gehaltsabrechnung. Bei Abweichungen mit der
-Personalabteilung klären.
+Inoffizielle Implementation. Keine Rechtsberatung. Im Zweifel gilt die offizielle
+Gehaltsabrechnung. Bei Abweichungen mit der Personalabteilung klären.
 
 ## Lizenz
 

@@ -1,10 +1,9 @@
 [project]
 name = "schichtrechner-marimo"
 version = "0.1.0"
-description = "HTV-konformer Schichtlohn-Rechner fuer ambulante dienste e.V. als marimo-Notebook."
+description = "HTV-Schichtlohn-Rechner als marimo-Notebook."
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Paul Fiedler" }]
 dependencies = [
     "marimo>=0.16.0",
 ]

@@ -27,17 +27,17 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        # Schichtrechner — ambulante dienste e.V.
+        # HTV-Schichtrechner
 
-        Lohn-Rechner fuer eine einzelne Schicht nach **HTV ambulante dienste e.V.**
-        (Stand: 2. AenderungsTV gueltig ab 1. Oktober 2023) und
-        **Anlage C** (Entgelttabelle gueltig ab Februar 2025).
+        Lohn-Rechner fuer eine einzelne Schicht nach **Haustarifvertrag persoenliche Assistenz**
+        (Stand: 2. AenderungsTV gueltig ab 1. Oktober 2023) und **Anlage C**
+        (Entgelttabelle gueltig ab Februar 2025).
 
-        Personalisiert auf **Entgeltgruppe 5, Erfahrungsstufe 2** (Assistent\*in).
+        Konfiguriert fuer **Entgeltgruppe 5, Erfahrungsstufe 2** (Assistent\*in).
 
-        > Der Rechner ist eine offene Re-Implementation des Finanzen-Tabs aus dem
-        > [AD Berlin Schichtplaner](https://github.com/karcino/adberlin-schichtplaner).
-        > Jede Zahl wird unten mit Paragraph aus dem HTV belegt.
+        > Das Notebook ist **reaktiv**: Sobald du unten einen Wert aenderst, wird das
+        > Ergebnis automatisch neu berechnet — kein "Berechnen"-Button noetig.
+        > Jede Zahl ist unten mit Paragraph aus dem HTV belegt.
         """
     )
     return
@@ -447,14 +447,11 @@ def _(entgelt, mo):
 
 ## Rechtliche Grundlage
 
-**Haustarifvertrag** (HTV) fuer die ambulante dienste e.V. vom 5. Maerz 2020,
+**Haustarifvertrag** (HTV) persoenliche Assistenz vom 5. Maerz 2020,
 inkl. 2. AenderungsTV gueltig ab 1. Oktober 2023.
 
-Tarifparteien:
-
-- **ambulante dienste e.V.** — Urbanstrasse 100, 10967 Berlin
-  (Buero: Wilhelm-Kabus-Str. 21-35, 10829 Berlin-Schoeneberg, Tel. 030 / 69 59 75 -410)
-- **ver.di** — Vereinte Dienstleistungsgewerkschaft, Landesbezirk Berlin-Brandenburg
+Tarifparteien: Arbeitgeber (Assistenzdienstleister e.V.) und **ver.di** —
+Vereinte Dienstleistungsgewerkschaft, Landesbezirk Berlin-Brandenburg.
 
 ### Verwendete Entgelt-Saetze (Anlage C, gueltig ab Februar 2025)
 
@@ -539,17 +536,14 @@ Fahrtzeit mit 125 % (= Grundlohn + KV-Zuschlag) verguetet (Lohnart 277).
 - **Solidaritaetszuschlag**: 5,5 % auf LSt, Freigrenze ~23.900 EUR LSt/Jahr —
   bei diesem Einkommensniveau praktisch **0**.
 
-### Offene Fragen (noch ungeklaert mit Alina Hermann <a.hermann@adberlin.org>)
+### Offene Punkte (nicht im Rechner beruecksichtigt)
 
-1. **Zuschlagsbasis**: HTV sagt "Stufe 3" (19,90 EUR). In der Januar-2026-Abrechnung
-   wurden die Zuschlaege auf dieser Basis gezahlt. Nach Anlage-C-Neufassung 2026 koennte
-   sich die Stufe-3-Summe aendern.
-2. **Lohnart 485** (Annahmeverzug-Zuschlag, 18,88 EUR in Jan): monatlich wiederkehrend
-   oder einmalig?
-3. **Lohnart 235** (Ausfall-Stunden AFG): Meldeweg und Hoehe.
+1. **Zuschlagsbasis**: HTV sagt "Stufe 3" (19,90 EUR). Nach Anlage-C-Neufassungen
+   kann sich diese Summe aendern — dann ist die Zuschlagsbasis anzupassen.
+2. **Annahmeverzug-Zuschlag** (Lohnart 485): monatlich wiederkehrend oder einmalig?
+3. **Ausfall-Stunden AFG** (Lohnart 235): Meldeweg und Hoehe.
 
-Diese Punkte sind **nicht in den Rechner eingebaut** und koennen das tatsaechliche
-Brutto um bis zu +90 EUR verschieben.
+Diese Punkte koennen das tatsaechliche Brutto um einige Euro verschieben.
 """)
     return
 
@@ -569,18 +563,12 @@ def _(mo):
 - **§ 32a EStG** (Einkommensteuer-Tarif) — [gesetze-im-internet.de/estg/__32a.html](https://www.gesetze-im-internet.de/estg/__32a.html)
 - **§ 9a EStG** (Arbeitnehmer-Pauschbetrag) — [gesetze-im-internet.de/estg/__9a.html](https://www.gesetze-im-internet.de/estg/__9a.html)
 - **SV-Beitragssaetze 2026** — [AOK Beitragssaetze](https://www.aok.de/fk/sozialversicherung/sozialversicherungsbeitraege/beitragssaetze/)
-- **Haustarifvertrag-Parteien** — [ver.di Berlin-Brandenburg](https://bb.verdi.de/) und [ambulante dienste e.V.](https://adberlin.org)
+- **ver.di Berlin-Brandenburg** (Tarifpartei) — [bb.verdi.de](https://bb.verdi.de/)
 
 ### Disclaimer
 
-Dieser Rechner ist eine **inoffizielle Re-Implementation** durch einen Beschaeftigten.
-Keine Rechtsberatung. Im Zweifel gilt die offizielle Gehaltsabrechnung der ambulante dienste e.V.
-Bei Abweichungen zuerst mit der Personalabteilung klaeren.
-
----
-
-*Quellcode: [github.com/karcino/schichtrechner-marimo](https://github.com/karcino/schichtrechner-marimo)*
-*Live: [karcino.github.io/schichtrechner-marimo](https://karcino.github.io/schichtrechner-marimo)*
+Inoffizielle Implementation. Keine Rechtsberatung. Im Zweifel gilt die offizielle
+Gehaltsabrechnung. Bei Abweichungen zuerst mit der Personalabteilung klaeren.
 """)
     return
 
