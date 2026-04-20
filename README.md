@@ -1,8 +1,18 @@
 # HTV-Schichtrechner
 
 Schichtlohn-Rechner als [marimo](https://marimo.io)-Notebook.
-Berechnet Brutto und Netto einer einzelnen Schicht nach **§ 7 HTV**
-(Haustarifvertrag persönliche Assistenz) für **Entgeltgruppe 5, Erfahrungsstufe 2**.
+Berechnet Brutto und Netto nach **§ 7 HTV** (Haustarifvertrag persönliche Assistenz)
+für **Entgeltgruppe 5, Erfahrungsstufe 2**.
+
+Zwei Varianten:
+
+- **Einzel-Rechner** (`notebook.py` → Pages `/`) — eine Schicht eingeben, Brutto + Netto sehen.
+- **Monats-Rechner** (`notebook_monat.py` → Pages `/monat/`) — komplette Monatsabrechnung simulieren
+  mit mehreren Schichten, CSV-Import aus Schichtplaner-Apps, gecappter Wechselschichtzulage
+  (§ 7 Abs. 5: max 105 EUR/Monat) und exaktem Monats-Netto.
+
+Gemeinsame Berechnungslogik liegt in `htv_calc.py` und wird beim WASM-Build per `build_wasm.py`
+in beide Notebooks inlined (Pyodide importiert keine externen Python-Dateien).
 
 Live via GitHub Pages — Python läuft als WebAssembly direkt im Browser, kein Server.
 
@@ -34,12 +44,17 @@ Falls uv noch nicht installiert ist: https://docs.astral.sh/uv/getting-started/i
 ## Statisch als WebAssembly exportieren
 
 ```bash
-uv run marimo export html-wasm notebook.py -o public --mode run
+# 1) htv_calc.py in beide Notebooks inlinen (self-contained für Pyodide)
+uv run python build_wasm.py
+
+# 2) Beide Notebooks exportieren
+uv run marimo export html-wasm _build/notebook.py       -o public       --mode run
+uv run marimo export html-wasm _build/notebook_monat.py -o public/monat --mode run
 ```
 
 Das Ergebnis ist eine statische Website in `public/`, die komplett im Browser
 läuft — kein Server nötig. Python-Code wird via Pyodide (WebAssembly) im Browser
-ausgeführt.
+ausgeführt. Der Monats-Rechner ist unter `public/monat/` erreichbar.
 
 ## GitHub Pages Deployment
 

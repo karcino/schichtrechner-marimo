@@ -16,6 +16,7 @@ __marimo__/
 public/
 dist/
 build/
+_build/
 
 # IDE
 .vscode/
