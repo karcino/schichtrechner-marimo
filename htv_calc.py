@@ -391,12 +391,14 @@ def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
             continue
 
         tag = None
+        datum_iso = None
         if datum_raw:
             d = _parse_date(str(datum_raw))
             if d is None:
                 fehler.append(f"Zeile {i}: Datum '{datum_raw}' nicht erkannt.")
                 continue
             tag = _WEEKDAY_MAP[d.weekday()]
+            datum_iso = d.isoformat()
         elif tag_raw:
             t = str(tag_raw).strip().capitalize()
             if t not in NEXT_DAY:
@@ -416,6 +418,7 @@ def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
 
         schichten.append({
             "tag": tag,
+            "datum": datum_iso,
             "start": _parse_hhmm(str(beginn)),
             "ende": _parse_hhmm(str(ende)),
             "kurzfristig": kurzfristig,
@@ -423,6 +426,123 @@ def parse_schicht_csv(text: str) -> tuple[list[dict], list[str]]:
         })
 
     return schichten, fehler
+
+
+# ─── Monats-Aggregation für Lohnabrechnung ───────────────────────────────────
+# Lohnart-Nummern sind exemplarisch — echte Lohnarten sind vom Arbeitgeber definiert.
+# Die Nummern dienen der Vergleichbarkeit mit einer echten Abrechnung.
+LOHNARTEN = {
+    "Regulaer":              {"nr": "100", "bez": "Grundentgelt"},
+    "Nacht":                 {"nr": "101", "bez": "Nachtzuschlag (§ 7 Abs. 1 b)"},
+    "Nacht (Sa)":            {"nr": "101", "bez": "Nachtzuschlag (§ 7 Abs. 1 b)"},
+    "Samstag 13-21 h":       {"nr": "102", "bez": "Samstagszuschlag (§ 7 Abs. 1 f)"},
+    "Sonntag":               {"nr": "103", "bez": "Sonntagszuschlag (§ 7 Abs. 1 c)"},
+    "Sonntag + Nacht":       {"nr": "104", "bez": "Sonntag + Nacht (§ 7 Abs. 1 b+c)"},
+    "Feiertag":              {"nr": "105", "bez": "Feiertag ohne FZA (§ 7 Abs. 1 d)"},
+    "Feiertag + Nacht":      {"nr": "106", "bez": "Feiertag + Nacht (§ 7 Abs. 1 b+d)"},
+    "Fahrtzeit":             {"nr": "277", "bez": "Fahrtzeit-Pauschale"},
+    "Fahrtzeit (KV, 125 %)": {"nr": "277", "bez": "Fahrtzeit bei KV (125 %)"},
+}
+
+
+def _label_base(label: str) -> str:
+    """'Sonntag (KV)' -> 'Sonntag', um KV-Varianten zu gruppieren."""
+    return label.replace(" (KV)", "")
+
+
+def aggregiere_monat(results: list, schichten_meta: list = None,
+                     entgelt: dict = ENTGELT, kv_aktiv: bool = None) -> dict:
+    """Aggregiert pro-Schicht-Ergebnisse in Monats-Summen nach Lohnart.
+
+    results:         Liste von berechne_schicht(...)-Ergebnissen (None = fehler).
+    schichten_meta:  Liste von Eingabe-Dicts (fuer KV-Flag).
+    """
+    if schichten_meta is None:
+        schichten_meta = [{} for _ in results]
+
+    lohnarten = {}  # label -> {stunden, satz, betrag, zuschlag_eur_h}
+    total_h = 0.0
+    total_brutto_basis = 0.0
+
+    for r, s in zip(results, schichten_meta):
+        if r is None:
+            continue
+        total_h += r["bezahlt_total_h"]
+        total_brutto_basis += r["brutto_basis"]
+        for pos in r["aufschluesselung"]:
+            key = _label_base(pos["label"])
+            if key not in lohnarten:
+                lohnarten[key] = {
+                    "stunden": 0.0,
+                    "satz": pos["satz"],
+                    "betrag": 0.0,
+                    "kv_varianten": set(),
+                }
+            lohnarten[key]["stunden"] += pos["stunden"]
+            lohnarten[key]["betrag"] += pos["betrag"]
+            # Wenn gleiche Kategorie mit & ohne KV vorkommt, separat listen
+            if "(KV)" in pos["label"]:
+                lohnarten[key]["kv_varianten"].add("mit_kv")
+            else:
+                lohnarten[key]["kv_varianten"].add("ohne_kv")
+
+    # Zulagen cap + Betraege
+    zul = cap_monats_zulagen(total_h, entgelt)
+    wechsel_betrag = zul["wechselschicht"]
+    orga_betrag = zul["organisation"]
+    monats_brutto = total_brutto_basis + wechsel_betrag + orga_betrag
+
+    return {
+        "lohnarten": lohnarten,
+        "total_h": total_h,
+        "brutto_basis": total_brutto_basis,
+        "wechselschicht": wechsel_betrag,
+        "wechselschicht_ungecappt": zul["wechselschicht_ungecappt"],
+        "wechselschicht_gecappt": zul["wechselschicht_gecappt"],
+        "organisation": orga_betrag,
+        "monats_brutto": monats_brutto,
+    }
+
+
+def netto_details(monats_brutto: float, sv: dict = SV, lst: dict = LST) -> dict:
+    """Liefert Netto-Berechnung MIT Einzelbeitraegen je SV-Art — fuer Abrechnungs-Darstellung."""
+    _sv = {
+        "kv":           monats_brutto * sv["kv"],
+        "kv_zusatz":    monats_brutto * sv["kv_zusatz"],
+        "pv":           monats_brutto * sv["pv"],
+        "pv_kinderlos": monats_brutto * sv["pv_kinderlos"],
+        "rv":           monats_brutto * sv["rv"],
+        "av":           monats_brutto * sv["av"],
+    }
+    sv_summe = sum(_sv.values())
+    sv_satz_summe = sv["kv"] + sv["kv_zusatz"] + sv["pv"] + sv["pv_kinderlos"] + sv["rv"] + sv["av"]
+
+    # LSt
+    anb_pausch_monat = lst["arbeitnehmer_pauschbetrag"] / 12
+    vorsorge_monat = sv_summe
+    zvE_monat = max(0.0, monats_brutto - anb_pausch_monat - vorsorge_monat)
+    zvE_jahr = zvE_monat * 12
+    lst_jahr_betrag = _lst_jahr(zvE_jahr, lst["grundfreibetrag_jahr"])
+    lst_monat_betrag = lst_jahr_betrag / 12
+    soli_monat = lst_monat_betrag * lst["soli_satz"]
+    netto = monats_brutto - sv_summe - lst_monat_betrag - soli_monat
+
+    return {
+        "sv_einzeln": _sv,
+        "sv_saetze":  {"kv": sv["kv"], "kv_zusatz": sv["kv_zusatz"],
+                       "pv": sv["pv"], "pv_kinderlos": sv["pv_kinderlos"],
+                       "rv": sv["rv"], "av": sv["av"]},
+        "sv_summe": sv_summe,
+        "sv_satz_summe": sv_satz_summe,
+        "arbeitnehmer_pausch_monat": anb_pausch_monat,
+        "zvE_monat": zvE_monat,
+        "zvE_jahr":  zvE_jahr,
+        "lst_jahr":  lst_jahr_betrag,
+        "lst_monat": lst_monat_betrag,
+        "soli_monat": soli_monat,
+        "soli_satz": lst["soli_satz"],
+        "netto": netto,
+    }
 
 
 BEISPIEL_CSV = """datum,beginn,ende,kurzfristig,fahrtzeit
