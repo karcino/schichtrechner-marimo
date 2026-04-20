@@ -30,6 +30,16 @@ def _():
 
 
 @app.cell(hide_code=True)
+def _():
+    import io
+    import pandas as pd
+    import pdfplumber
+
+    import htv_calc
+    return htv_calc, io, pd, pdfplumber
+
+
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -69,17 +79,14 @@ def _(mo):
 
 
 @app.cell
-def _(upload_csv):
-    import htv_calc
-
+def _(htv_calc, pd, upload_csv):
     df_eigen = None
     fehler_eigen: list[str] = []
 
     if upload_csv.value:
-        text = upload_csv.value[0].contents.decode("utf-8", errors="replace")
-        schichten, fehler_eigen = htv_calc.parse_schicht_csv(text)
-        import pandas as pd
-        df_eigen = pd.DataFrame(schichten)
+        _text = upload_csv.value[0].contents.decode("utf-8", errors="replace")
+        _schichten, fehler_eigen = htv_calc.parse_schicht_csv(_text)
+        df_eigen = pd.DataFrame(_schichten)
     return df_eigen, fehler_eigen
 
 
@@ -117,24 +124,28 @@ def _(mo):
 
 
 @app.cell
-def _(upload_datev):
-    import io
-    import pdfplumber
-
+def _(io, pdfplumber, upload_datev):
     df_lohn = None
     if upload_datev.value:
-        with pdfplumber.open(io.BytesIO(upload_datev.value[0].contents)) as pdf:
-            seiten_text = [p.extract_text() or "" for p in pdf.pages]
-        # TODO: DATEV-spezifischer Parser — Layout haengt vom AG ab.
-        # Platzhalter: rohtext zeigen, bis Felder identifiziert sind.
-        df_lohn = {"seiten": seiten_text}
+        with pdfplumber.open(io.BytesIO(upload_datev.value[0].contents)) as _pdf:
+            _seiten = [_page.extract_text() or "" for _page in _pdf.pages]
+        # Roh-Container: Parser (Brutto/Zuschlaege/Stunden) folgt, sobald
+        # DATEV-Layout auf realer Abrechnung verifiziert ist.
+        df_lohn = {"seiten": _seiten}
     return (df_lohn,)
 
 
 @app.cell
 def _(df_lohn, mo):
     mo.stop(df_lohn is None, mo.md("_Noch keine DATEV-PDF geladen._"))
-    mo.md(f"**Seiten:** {len(df_lohn['seiten'])}\n\n_Parser-TODO: Felder extrahieren._")
+    _vorschau = [
+        mo.accordion({f"Seite {_i + 1} ({len(_t)} Zeichen)": mo.md(f"```\n{_t}\n```")})
+        for _i, _t in enumerate(df_lohn["seiten"])
+    ]
+    mo.vstack([
+        mo.md(f"**{len(df_lohn['seiten'])} Seiten** geladen. Roh-Text ausklappen:"),
+        *_vorschau,
+    ])
     return
 
 
@@ -159,26 +170,43 @@ def _(mo):
 
 
 @app.cell
-def _(upload_ag):
-    import io
-    import pdfplumber
-
+def _(io, pdfplumber, upload_ag):
     df_ag = None
     if upload_ag.value:
-        with pdfplumber.open(io.BytesIO(upload_ag.value[0].contents)) as pdf:
-            tabellen = []
-            for p in pdf.pages:
-                for tab in p.extract_tables() or []:
-                    tabellen.extend(tab)
-        # TODO: Tabellen -> DataFrame mit (datum, beginn, ende, typ)
-        df_ag = {"rows": tabellen}
+        with pdfplumber.open(io.BytesIO(upload_ag.value[0].contents)) as _pdf:
+            _tab_pro_seite: list[list[list]] = []
+            _text_pro_seite: list[str] = []
+            for _page in _pdf.pages:
+                _tab_pro_seite.append(_page.extract_tables() or [])
+                _text_pro_seite.append(_page.extract_text() or "")
+        # Roh-Container: Tabellen pro Seite + Fallback-Text. Parser
+        # (datum, beginn, ende, typ) folgt, sobald reale Schichtliste vorliegt.
+        df_ag = {"tabellen_pro_seite": _tab_pro_seite, "text_pro_seite": _text_pro_seite}
     return (df_ag,)
 
 
 @app.cell
-def _(df_ag, mo):
+def _(df_ag, mo, pd):
     mo.stop(df_ag is None, mo.md("_Noch keine AG-Schichtliste geladen._"))
-    mo.md(f"**Zeilen roh:** {len(df_ag['rows'])}\n\n_Parser-TODO: Struktur finden._")
+
+    _panels = {}
+    for _seite_idx, _tabellen in enumerate(df_ag["tabellen_pro_seite"]):
+        _label = f"Seite {_seite_idx + 1}"
+        if not _tabellen:
+            _panels[_label] = mo.md("_Keine Tabelle erkannt._")
+            continue
+        _views = []
+        for _t_idx, _tab in enumerate(_tabellen):
+            _df = pd.DataFrame(_tab[1:], columns=_tab[0]) if _tab and len(_tab) > 1 else pd.DataFrame(_tab)
+            _views.append(mo.md(f"**Tabelle {_t_idx + 1}** ({_df.shape[0]} × {_df.shape[1]})"))
+            _views.append(_df)
+        _panels[_label] = mo.vstack(_views)
+
+    _gesamt = sum(len(t) for t in df_ag["tabellen_pro_seite"])
+    mo.vstack([
+        mo.md(f"**{len(df_ag['tabellen_pro_seite'])} Seiten · {_gesamt} Tabellen** erkannt."),
+        mo.accordion(_panels),
+    ])
     return
 
 
@@ -198,14 +226,39 @@ def _(mo):
 
 
 @app.cell
-def _(df_ag, df_eigen, df_lohn):
+def _(mo):
+    toleranz_min = mo.ui.number(
+        start=0, stop=30, step=1, value=5,
+        label="Zeit-Toleranz (Minuten) — Beginn/Ende gleich, wenn Abweichung ≤ Toleranz",
+    )
+    toleranz_brutto = mo.ui.number(
+        start=0.0, stop=50.0, step=0.5, value=1.0,
+        label="Brutto-Toleranz (EUR) — Summe gleich, wenn Abweichung ≤ Toleranz",
+    )
+    mo.hstack([toleranz_min, toleranz_brutto])
+    return toleranz_brutto, toleranz_min
+
+
+@app.cell
+def _(df_ag, df_eigen, df_lohn, toleranz_brutto, toleranz_min):
+    # Entscheidungsrahmen fuer die Diff-Heuristik:
+    # - Schicht-Diff: Outer-Join auf Datum. Differenz, wenn Schicht nur einseitig
+    #   existiert, oder wenn Beginn/Ende um > toleranz_min abweichen, oder wenn
+    #   Typ (Nacht/Samstag/Sonntag/Feiertag) nicht uebereinstimmt.
+    # - Brutto-Diff: Summe eigener berechneter Bruttos vs. DATEV-Brutto.
+    #   Differenz, wenn |eigen - datev| > toleranz_brutto.
+    # Umsetzung folgt, sobald df_ag (Schichten als DataFrame) und df_lohn
+    # (Brutto-Summe) strukturiert vorliegen.
+
     diffs: list[dict] = []
-    if df_eigen is not None and df_ag is not None:
-        # TODO: Join auf Datum, vergleich von (beginn, ende, typ).
-        pass
-    if df_lohn is not None and df_eigen is not None:
-        # TODO: Summe eigener berechneter Bruttos vs. DATEV-Brutto.
-        pass
+    _tol_min = toleranz_min.value
+    _tol_eur = toleranz_brutto.value
+
+    if df_eigen is not None and df_ag is not None and isinstance(df_ag, dict):
+        pass  # df_ag ist noch Roh-Container — wartet auf Parser
+    if df_lohn is not None and df_eigen is not None and isinstance(df_lohn, dict):
+        pass  # df_lohn ist noch Roh-Container — wartet auf Parser
+
     return (diffs,)
 
 
@@ -252,16 +305,16 @@ def _(absender, btn, diffs, empfaenger, mo):
     outbox = Path("outbox")
     outbox.mkdir(exist_ok=True)
     pfade = []
-    for i, d in enumerate(diffs, 1):
-        msg = EmailMessage()
-        msg["From"] = absender.value
-        msg["To"] = empfaenger.value
-        msg["Subject"] = f"Abrechnungs-Differenz {i}"
-        msg.set_content(f"Hallo,\n\nDifferenz festgestellt:\n\n{d}\n\nBitte pruefen.\n")
-        p = outbox / f"diff_{i:03d}.eml"
-        p.write_bytes(bytes(msg))
-        pfade.append(str(p))
-    mo.md("**Geschrieben:**\n\n" + "\n".join(f"- `{p}`" for p in pfade))
+    for _i, _d in enumerate(diffs, 1):
+        _msg = EmailMessage()
+        _msg["From"] = absender.value
+        _msg["To"] = empfaenger.value
+        _msg["Subject"] = f"Abrechnungs-Differenz {_i}"
+        _msg.set_content(f"Hallo,\n\nDifferenz festgestellt:\n\n{_d}\n\nBitte pruefen.\n")
+        _p = outbox / f"diff_{_i:03d}.eml"
+        _p.write_bytes(bytes(_msg))
+        pfade.append(str(_p))
+    mo.md("**Geschrieben:**\n\n" + "\n".join(f"- `{_p}`" for _p in pfade))
     return
 
 
