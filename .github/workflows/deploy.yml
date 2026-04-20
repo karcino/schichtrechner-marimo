@@ -28,8 +28,14 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Export notebook to WebAssembly
-        run: uv run marimo export html-wasm notebook.py -o public --mode run
+      - name: Build self-contained notebooks (inline htv_calc)
+        run: uv run python build_wasm.py
+
+      - name: Export Einzel-Rechner to WebAssembly
+        run: uv run marimo export html-wasm _build/notebook.py -o public --mode run
+
+      - name: Export Monats-Rechner to WebAssembly
+        run: uv run marimo export html-wasm _build/notebook_monat.py -o public/monat --mode run
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
