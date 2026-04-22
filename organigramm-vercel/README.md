@@ -30,11 +30,14 @@ npm run dev      # http://localhost:3000
 1. Auf vercel.com **New Project** → Repo `schichtrechner-marimo` importieren.
 2. **Root Directory** auf `organigramm-vercel` setzen.
 3. Framework: _Next.js_ wird automatisch erkannt. `vercel.json` setzt den Build-Command auf `npm run build:public` (siehe Sub-Projekt I / Dual-Build).
-4. **Env-Variablen** (für Edit-UI aus Sub-Projekt E — nur nötig wenn Kollaboration aktiv sein soll):
+4. **Env-Variablen** (für Edit-UI + Review aus Sub-Projekt E — nur nötig wenn Kollaboration aktiv sein soll):
    - `EDIT_PASSWORD` — geteiltes Passwort für Vorschlags-Absender (frei wählbar, z.B. via `openssl rand -hex 16`)
-   - `BRAIN_URL` — `https://<ref>.supabase.co/functions/v1/open-brain-mcp`
+   - `REVIEW_PASSWORD` — Pauls Admin-Passwort für `/review`. **Unbedingt anders wählen als `EDIT_PASSWORD`.**
+   - `BRAIN_URL` — `https://<ref>.supabase.co/functions/v1/open-brain-mcp` (OB1 Edge Function)
    - `BRAIN_KEY` — der MCP-Access-Key aus dem OB1-Setup
-   Ohne diese Env-Vars antwortet `/api/propose` mit 503 — der Button erscheint weiterhin, leitet aber zum Fehler-State. Also entweder alle drei setzen oder den `ProposalButton` in [ViewSwitcher.tsx](components/ViewSwitcher.tsx) auskommentieren.
+   - `SUPABASE_URL` — `https://<ref>.supabase.co` (nur base-URL, ohne `/functions/...`)
+   - `SUPABASE_SERVICE_KEY` — der Secret-Key aus Supabase → Settings → API Keys → Secret keys → default (beginnt mit `sb_secret_`)
+   Ohne diese Env-Vars antworten `/api/propose` + `/api/review` mit 503 — der Button erscheint weiterhin, leitet aber zum Fehler-State. Also entweder alle setzen oder `ProposalButton` in [ViewSwitcher.tsx](components/ViewSwitcher.tsx) auskommentieren.
 5. Deploy. Fertiges Deployment unter `https://<projekt>.vercel.app`.
 
 Die restliche Repo (Marimo-Notebooks) wird von Vercel ignoriert, weil das Root-Directory auf den Unterordner zeigt.
@@ -53,14 +56,18 @@ Details: `lib/enrichments.ts` importiert aus der auto-generierten `lib/enrichmen
 
 ## Eingabe-UI (Sub-Projekt E, Scope E-LITE)
 
-Floating-Button unten rechts → Passwort → Name → Form (Kategorie + Content + optional Quelle/Knoten-ID) → POST `/api/propose` → Vorschlag landet in OB1 mit tag `edit-proposal` + `pending`. Paul sieht sie via Claude-Code-MCP:
-
-```
-(in Claude Code:)
-> Welche pending edit-proposals gibt es in adberlin-brain?
-```
+Floating-Button unten rechts → Passwort → Name → Form (Kategorie + Content + optional Quelle/Knoten-ID) → POST `/api/propose` → Vorschlag landet in OB1 mit tag `edit-proposal` + `pending`.
 
 Kein Accounts-System, kein Tracking. Name bleibt in `localStorage`, Passwort wird nach erstem erfolgreichen Submit auch gecached.
+
+## Proposal-Review (Paul-only)
+
+`/review?key=<REVIEW_PASSWORD>` zeigt alle Proposals gefiltert nach Status (`pending`, `accepted`, `rejected`, `later`). Accept/Reject/Later-Buttons aktualisieren das Status-Metadata-Feld direkt in der Supabase-DB.
+
+Alternativ-Zugang via Claude-Code-MCP:
+```
+> adberlin-brain: liste pending edit-proposals auf
+```
 
 ## Daten pflegen
 
