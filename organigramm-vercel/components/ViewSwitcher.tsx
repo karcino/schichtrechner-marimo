@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 // Client-side only: React Flow und Matrix brauchen Browser-DOM.
 const OrgChart = dynamic(() => import("./OrgChart"), { ssr: false });
 const RACIMatrix = dynamic(() => import("./RACIMatrix"), { ssr: false });
+const ProposalButton = dynamic(() => import("./ProposalButton"), { ssr: false });
 
 type View = "organigramm" | "raci";
 
@@ -40,6 +41,7 @@ export default function ViewSwitcher() {
         </button>
       </nav>
       {view === "organigramm" ? <OrgChart /> : <RACIMatrix />}
+      <ProposalButton />
     </div>
   );
 }
