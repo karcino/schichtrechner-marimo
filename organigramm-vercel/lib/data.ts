@@ -428,9 +428,9 @@ export const NODES: OrgNode[] = [
     verify: "verified", group: "clients", sources: ["S11","S33"], citations: ["SGB9_29"] },
 
   // ── Assistenz-Formen ────────────────────────────────────────────────────
-  { id: "ASS",    label: "Persönliche Assistenz", role: "Kerngeschäft · 24/7",
-    description: "Unterstützung in allen Lebensbereichen: Körperpflege, Ernährung, Haushalt, Kommunikation. Einsätze 24/7 in wechselnden Teams.",
-    verify: "verified", group: "assistance", sources: ["S29","S10"], citations: ["HTV_7_1","HTV_7_6"] },
+  { id: "ASS",    label: "Persönliche Assistenz", role: "Kerngeschäft · 24/7 · LK 32",
+    description: "Unterstützung in allen Lebensbereichen: Körperpflege, Ernährung, Haushalt, Kommunikation. Einsätze 24/7 in wechselnden Teams. Abgerechnet als Leistungskomplex 32 (LK 32) gegenüber Kostenträgern. Konzeptioneller Kern laut Leitbild (S7): 5 Kompetenzen des/der Assistenznehmer*in — (1) Personalkompetenz: Auswahl aus MitarbeiterInnenpool; (2) Zeitkompetenz: wann gearbeitet wird; (3) Ortskompetenz: wo; (4) Anleitungskompetenz: wie; (5) Finanzkompetenz: Verwendung der Mittel. Auch Assistent*innen haben das Recht, Einsätze abzulehnen — Gegenseitigkeit ist Teil des Selbstverständnisses.",
+    verify: "verified", group: "assistance", sources: ["S7","S29","S10"], citations: ["HTV_7_1","HTV_7_6"] },
   { id: "ASS_BASE",   label: "Grundassistenz",          role: "Körperpflege · Ernährung · Haushalt",          description: "Kern-Assistenzleistungen im Alltag.", verify: "verified", group: "assistance", sources: ["S29"] },
   { id: "ASS_COMM",   label: "Kommunikations­assistenz", role: "Kommunikation · Teilhabe",                    description: "Unterstützung bei der Kommunikation mit dem Umfeld.", verify: "verified", group: "assistance", sources: ["S29"] },
   { id: "ASS_NIGHT",  label: "Nachtassistenz",          role: "Nacht / Bereitschaft",                          description: "Begleitung in der Nacht, teilweise als Bereitschaft. HTV § 7 Abs. 1 b regelt Nachtzuschläge.", verify: "verified", group: "assistance", sources: ["S16"], citations: ["HTV_7_1","HTV_7_5"] },
