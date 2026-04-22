@@ -1,0 +1,79 @@
+name: Deploy Organigramm (Vercel)
+
+# Baut die Next.js-App in organigramm-vercel/ und deployt sie auf Vercel.
+# Laeuft nur bei Aenderungen in organigramm-vercel/ oder diesem Workflow.
+#
+# Erforderliche Repo-Secrets (Settings -> Secrets):
+#   VERCEL_TOKEN       Personal Token aus vercel.com/account/tokens
+#   VERCEL_ORG_ID      aus .vercel/project.json nach `vercel link`
+#   VERCEL_PROJECT_ID  dito
+#
+# Projekt muss einmalig auf Vercel angelegt sein (vercel link lokal, dann
+# die beiden IDs als Secret setzen). Die CLI baut aus organigramm-vercel/
+# direkt — Root-Directory-Problem entfaellt.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "organigramm-vercel/**"
+      - ".github/workflows/vercel-deploy.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "organigramm-vercel/**"
+      - ".github/workflows/vercel-deploy.yml"
+  workflow_dispatch:
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  deploy-preview:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: organigramm-vercel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: organigramm-vercel/package-lock.json
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
+      - name: Build (preview)
+        run: vercel build --token="$VERCEL_TOKEN"
+      - name: Deploy preview
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+  deploy-production:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: organigramm-vercel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: organigramm-vercel/package-lock.json
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel environment
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Build (production)
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+      - name: Deploy production
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
