@@ -89,6 +89,13 @@ export const SOURCES: Record<string, Source> = {
 
   // ── OSINT-Register (Sub-Projekt D) ────────────────────────────────────
   S49: { id: "S49", title: "Handelsregisterauszug Neue Lebenswege GmbH (HRB 145571 B)",       url: "https://www.handelsregister-online.de/handelsregisterauszug/Berlin/Charlottenburg-Berlin/Neue-Lebenswege-GmbH",            accessed: "2026-04-22", kind: "osint-register" },
-  S50: { id: "S50", title: "NorthData – Neue Lebenswege GmbH (HRB 145571 B Charlottenburg)",  url: "https://www.northdata.com/Neue%20Lebenswege%20GmbH,%20Berlin/Amtsgericht%20Charlottenburg%20(Berlin)%20HRB%20145571%20B",  accessed: "2026-04-22", kind: "osint-register" },
+  S50: { id: "S50", title: "NorthData – Neue Lebenswege GmbH (HRB 145571 B Charlottenburg)",  url: "https://www.northdata.com/Neue%20Lebenswege%20GmbH,%20Berlin/Amtsgericht%20Charlottenburg%20(Berlin)%20HRB%20145571%20B",  accessed: "2026-04-23", kind: "osint-register" },
   S51: { id: "S51", title: "Gemeinsames Registerportal der Länder (Recherche-Einstieg)",      url: "https://www.handelsregister.de/rp_web/mask.do?Typ=n",                                                                     accessed: "2026-04-22", kind: "osint-register" },
+
+  // ── OSINT-Runde 2 ─────────────────────────────────────────────────────
+  S52: { id: "S52", title: "Cooperative Mensch eG – Homepage",                                url: "https://www.cooperative-mensch.de/",                                                                                      accessed: "2026-04-23", kind: "primary" },
+  S53: { id: "S53", title: "Wikipedia – Cooperative Mensch (ehem. Spastikerhilfe Berlin)",    url: "https://de.wikipedia.org/wiki/Cooperative_Mensch",                                                                         accessed: "2026-04-23", kind: "secondary" },
+  S54: { id: "S54", title: "Paritätischer – ad:bewegt-Ausstellung (Geschichte ad e.V.)",      url: "https://www.paritaet-berlin.de/aktuelles/detail/adbewegt-vom-musterkrueppelchen-zur-persoenlichen-assistenz",             accessed: "2026-04-23", kind: "secondary" },
+  S55: { id: "S55", title: "Berliner Zuwendungsdatenbank (Recherche-Einstieg)",               url: "https://www.berlin.de/sen/finanzen/service/zuwendungsdatenbank/",                                                         accessed: "2026-04-23", kind: "osint-register" },
+  S56: { id: "S56", title: "Familienratgeber – ad e.V. Einsatzstelle",                        url: "https://www.familienratgeber.de/beratung-und-hilfen/adressen-vor-ort/125172",                                              accessed: "2026-04-23", kind: "secondary" },
 };

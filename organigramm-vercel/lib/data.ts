@@ -471,13 +471,16 @@ export const NODES: OrgNode[] = [
     verify: "verified", group: "representation", sources: ["S15","S24"] },
 
   // ── Verbunden / extern ──────────────────────────────────────────────────
-  { id: "NLW", label: "Neue Lebenswege GmbH", role: "HRB 145571 B · Charlottenburg",
-    description: "Eigenständige gGmbH, eingetragen beim AG Charlottenburg (HRB 145571 B). Sitz: Kurfürstenstr. 75, 10787 Berlin. Zweck laut Handelsregister: Integration behinderter Menschen, Förderung der Wohlfahrt, Bildung, Jugend-/Altenpflege. Verbunden mit ad e.V. über den gemeinsamen Haustarifvertrag (Tarifkommission ver.di). Gesellschaftsrechtliche Beziehung zu ad e.V. (Tochter? Schwester? unabhängig?) bleibt öffentlich unklar — im Handelsregister ist ad e.V. nicht als Gesellschafter gelistet.",
+  { id: "NLW", label: "Neue Lebenswege GmbH", role: "HRB 145571 B · Tochter von Cooperative Mensch eG",
+    description: "gGmbH, gegründet 02.11.2012, AG Charlottenburg (HRB 145571 B). Sitz: Zimmerstr. 26-27, 10969 Berlin (ehem. Kurfürstenstr. 75, 10787). GF: Georg Dudaschwili (seit Juni 2021). Stammkapital 25.000 EUR. Gesellschafter: Cooperative Mensch eG (seit spätestens 2014, vorher Spastikerhilfe Berlin eG). Zweck laut HR: Integration behinderter Menschen, Förderung der Wohlfahrt, Bildung, Jugend-/Altenpflege. Verbunden mit ad e.V. nur über den gemeinsamen Haustarifvertrag (Tarifkommission ver.di) — KEINE Konzern- oder Gesellschafter-Verbindung zu ad.",
     verify: "verified", group: "external", sources: ["S15","S17","S49","S50"],
-    address: "Kurfürstenstraße 75, 10787 Berlin" },
+    address: "Zimmerstr. 26-27, 10969 Berlin" },
+  { id: "COOP", label: "Cooperative Mensch eG", role: "Genossenschaft · 25+ Einrichtungen",
+    description: "Freier Träger der Berliner Behindertenhilfe. Genossenschaft, gegründet 1990 als Spastikerhilfe Berlin eG (die wiederum aus einer 1958 gegründeten Eltern-Initiative hervorging). 2018 umbenannt in Cooperative Mensch eG. Betreibt in Berlin 25+ Einrichtungen: Wohneinrichtungen, Tagesförderstätten, Werkstätten, Beratung, ambulante Angebote. Mutter-Genossenschaft der Neuen Lebenswege GmbH. 2021 Fusion mit Lebenswege Wohnprojekte GmbH. KEIN gesellschaftsrechtlicher Bezug zu ad e.V.",
+    verify: "verified", group: "external", sources: ["S52","S53"] },
   { id: "DV",  label: "Paritätischer Berlin", role: "Dachverband",
-    description: "ad e.V. ist Mitglied im Paritätischen Wohlfahrtsverband Landesverband Berlin.",
-    verify: "inferred", group: "external", sources: ["S20"] },
+    description: "ad e.V. ist Mitglied im Paritätischen Wohlfahrtsverband Landesverband Berlin. Paritätischer veröffentlichte 2021/22 eine digitale Ausstellung „ad:bewegt! – vom Musterkrüppelchen zur Persönlichen Assistenz\" zur Geschichte des Vereins.",
+    verify: "verified", group: "external", sources: ["S20","S54"] },
 
   // ── Kostenträger ────────────────────────────────────────────────────────
   { id: "F_SEN", label: "Senatsverw. Soziales", role: "EGH-Träger Berlin",
@@ -582,6 +585,7 @@ export const EDGES: OrgEdge[] = [
   { from: "BR", to: "BB",  label: "vertritt",  verify: "verified" },
   { from: "TK", to: "GF",  label: "Haustarif", verify: "verified" },
   { from: "TK", to: "NLW", label: "Haustarif", verify: "verified" },
+  { from: "COOP", to: "NLW", label: "Gesellschafter", verify: "verified" },
   { from: "VDF", to: "BR", label: "stellt",    verify: "verified" },
   { from: "VERDI", to: "TK", label: "begleitet", verify: "verified" },
   { from: "VERDI", to: "VDF", label: "trägt",    verify: "verified" },
