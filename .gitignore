@@ -32,6 +32,7 @@ organigramm/raw/
 organigramm/ingest/.env
 organigramm/ingest/.ob1-secrets
 organigramm-vercel/lib/enrichments.private.ts
+organigramm-vercel/lib/enrichments.generated.ts
 *.eml
 *.mbox
 

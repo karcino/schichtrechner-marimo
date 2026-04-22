@@ -41,15 +41,22 @@ export const ENRICHMENTS_PUBLIC: Enrichment[] = [
   // Wird iterativ aus Sub-Projekt D (Register-Scraper) und J (RACI) gefüllt.
 ];
 
-/**
- * Loader für die UI. Aktuell nur public. In Sub-Projekt I wird hier
- * dynamisch enrichments.private.ts dazugeladen, wenn BUILD_MODE=private.
- */
+// Dual-Build-Gate: Generator (scripts/generate-enrichments.mjs) schreibt
+// enrichments.generated.ts vor jedem Build. Im public-Build exportiert er
+// den leeren Stub; im private-Build (BUILD_MODE=private) bündelt er die
+// echte enrichments.private.ts mit rein.
+import { ENRICHMENTS_PRIVATE, INCLUDES_PRIVATE } from "./enrichments.generated";
+
+/** Loader für die UI. Merged public + private (wenn private-Build aktiv). */
 export function loadEnrichments(): Enrichment[] {
-  return ENRICHMENTS_PUBLIC;
+  if (!INCLUDES_PRIVATE) return ENRICHMENTS_PUBLIC;
+  return [...ENRICHMENTS_PUBLIC, ...ENRICHMENTS_PRIVATE];
 }
 
 /** Filter: alle Enrichments für einen Knoten. */
 export function enrichmentsFor(node_id: string): Enrichment[] {
   return loadEnrichments().filter((e) => e.node_id === node_id);
 }
+
+/** Build-Mode-Flag für die UI (z.B. Banner "Private Build" im Header). */
+export const IS_PRIVATE_BUILD = INCLUDES_PRIVATE;
