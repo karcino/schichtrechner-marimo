@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Organigramm · ambulante dienste e.V.</title>
-  <meta name="description" content="Interaktives Organigramm von ambulante dienste e.V. und seinem Betriebsrat, mit Quellenbelegen." />
+  <meta name="description" content="Organigramm und interne Prozesse bei ambulante dienste e.V. + Betriebsrat, mit Zitaten aus Tarifvertrag und Sozialrecht." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,22 +25,18 @@
     <section class="intro">
       <h1>Organigramm <span class="sub">ambulante dienste e.V. + Betriebsrat</span></h1>
       <p>
-        Interaktive Darstellung der Organisationsstruktur von
+        Interaktive Struktur von
         <a href="https://www.adberlin.com/neu/" target="_blank" rel="noopener">ambulante dienste e.V.</a>
-        und seines <a href="https://betriebsrat-ad.de/" target="_blank" rel="noopener">Betriebsrats</a>.
-        Jeder Knoten ist klickbar &rarr; die rechte Spalte zeigt Details und die zugrundeliegende
-        Quelle. Felder, die aus öffentlich zugänglichen Snippets rekonstruiert, aber noch nicht
-        direkt auf der Originalseite verifiziert sind, sind mit <span class="badge warn">verify</span> markiert.
-      </p>
-      <p style="font-size:13px;color:var(--muted);margin-top:8px;">
-        Kompakte Kern-Ansicht. Für die erweiterte Version mit Assistenz-Formen,
-        Kostenträgern, Rechtsrahmen (SGB IX/XI/V, BTHG, TIB) und Qualifizierungs-Modulen
-        → Vercel-Version unter <code>organigramm-vercel/</code> (nach Vercel-Deploy).
+        und <a href="https://betriebsrat-ad.de/" target="_blank" rel="noopener">Betriebsrat</a>, erweitert um
+        <strong>interne Prozesse</strong> (Monatsdienstplanung, kurzfristige Vermittlung, Einarbeitung),
+        <strong>Kommunikationskanäle</strong> (Telefon · E-Mail · SMS · HiCare) und
+        <strong>rechtliche Grundlagen</strong> (HTV · BetrVG · SGB IX/XI/V · DSGVO).
+        Klick auf einen Knoten → Details rechts.
       </p>
       <div class="legend">
-        <span class="dot verified"></span> verifiziert (Impressum / offizielle Seite)
-        <span class="dot snippet"></span> aus Such-Snippet rekonstruiert
-        <span class="dot archive"></span> aus Archiv / ältere Quelle
+        <span class="dot ok"></span> 🟢 <strong>belegt</strong> — direkt auf Originalseite / im Vertrag
+        <span class="dot warn"></span> 🟡 <strong>abgeleitet</strong> — aus Tarifvertrag / Branche
+        <span class="dot danger"></span> 🔴 <strong>vermutet</strong> — braucht Bestätigung
       </div>
     </section>
 
@@ -59,27 +55,49 @@
     <aside class="details" id="details">
       <div class="placeholder">
         <h2>Details</h2>
-        <p>Wähle einen Knoten im Organigramm, um Rolle, Verantwortung und Quelle zu sehen.</p>
+        <p>Wähle einen Knoten im Organigramm, um Rolle, Verantwortung, rechtliche Grundlagen und Belege zu sehen.</p>
       </div>
     </aside>
   </main>
+
+  <section class="wrap section">
+    <h2>▶ Interne Prozesse</h2>
+    <p class="sec-intro">
+      Wie die Schicht zur Assistenz kommt. Jeder Schritt ist mit Akteur*in, Kanal und Verifikations­status ausgezeichnet — gelb/orange wenn aus dem Tarifvertrag abgeleitet, grün wenn direkt belegt. Zitate aus Tarifvertrag und Gesetz sind unter jedem Prozess verlinkt.
+    </p>
+    <div id="processes" class="process-list"></div>
+  </section>
+
+  <section class="wrap section">
+    <h2>✉ Kommunikations-Kanäle</h2>
+    <p class="sec-intro">
+      Welche Kanäle für welchen Zweck. Datenschutz-Besonderheit: bei SMS werden aus Gründen von Art. 9 DSGVO keine Kund*innen-Adressen übermittelt — nur Namen/Initialen und Zeitfenster. Adressen folgen nach Zusage per Telefon.
+    </p>
+    <div id="channels" class="channel-list"></div>
+  </section>
+
+  <section class="wrap section">
+    <h2>§ Rechtliche Grundlagen</h2>
+    <p class="sec-intro">
+      Jeder Prozess und jede Zuordnung ist — wo öffentlich verfügbar — mit Tarifvertrag, Sozialrecht oder Datenschutzrecht belegt. Zitate wörtlich, verlinkt auf Primärquelle mit Abruf-Datum.
+    </p>
+    <div id="citations" class="citation-list"></div>
+  </section>
 
   <section class="wrap sources">
     <h2>Quellen</h2>
     <ol id="sourcesList"></ol>
     <p class="disclaimer">
-      Alle Angaben stammen aus öffentlich zugänglichen Web-Quellen (Stand 22.04.2026) und wurden
-      zum Teil aus Suchmaschinen-Snippets rekonstruiert. Diese Darstellung dient ausschließlich der
-      Orientierung; verbindlich sind die Eintragungen im Vereinsregister beim Amtsgericht
-      Charlottenburg und die offiziellen Informationen auf
-      <a href="https://www.adberlin.com/neu/impressum" target="_blank" rel="noopener">adberlin.com/neu/impressum</a>.
+      Alle Angaben stammen aus öffentlich zugänglichen Web-Quellen (Stand 22.04.2026). Gelb/🟡 markierte Felder sind aus Tarifvertrag + Struktur abgeleitet; rot/🔴 markierte sind Vermutungen, die intern bestätigt werden sollten. Diese Darstellung dient der Orientierung. Verbindlich sind Eintragungen im Vereinsregister beim Amtsgericht Charlottenburg und die offiziellen Informationen unter
+      <a href="https://www.adberlin.com/neu/impressum" target="_blank" rel="noopener">adberlin.com/impressum</a>.
     </p>
   </section>
 
   <footer class="foot">
     <div class="wrap">
       Gebaut als Teil von <a href="../">schichtrechner-marimo</a> ·
-      <a href="https://github.com/karcino/schichtrechner-marimo/tree/main/organigramm" target="_blank" rel="noopener">Repo</a>
+      <a href="https://github.com/karcino/schichtrechner-marimo/tree/main/organigramm" target="_blank" rel="noopener">Repo</a> ·
+      Erweiterte, interaktive Version auf Vercel folgt (siehe Repo)
     </div>
   </footer>
 

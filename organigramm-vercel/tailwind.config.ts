@@ -15,6 +15,7 @@ const config: Config = {
         accent: { DEFAULT: "#2d6a4f", soft: "#d8eadd" },
         warn:   { DEFAULT: "#b45309", soft: "#fef3c7" },
         info:   { DEFAULT: "#1e40af", soft: "#dbeafe" },
+        danger: { DEFAULT: "#b91c1c", soft: "#fee2e2" },
       },
       fontFamily: {
         sans: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Arial", "sans-serif"],

@@ -15,34 +15,51 @@ import ReactFlow, {
 } from "reactflow";
 import { OrgNodeCard } from "./OrgNode";
 import { DetailPanel } from "./DetailPanel";
+import { ProcessPanel } from "./ProcessPanel";
 import { buildGraph } from "@/lib/layout";
-import { NODES, GROUPS, ORG_META, type Group, type OrgNode as OrgNodeT } from "@/lib/data";
+import { NODES, GROUPS, ORG_META, PROCESSES, type Group, type OrgNode as OrgNodeT } from "@/lib/data";
 import { SOURCES } from "@/lib/sources";
 
 const nodeTypes = { org: OrgNodeCard };
 
 const ALL_GROUPS = Object.keys(GROUPS) as Group[];
-/** Default-Sichtbarkeit: "Kern"-Layer angezeigt, Zusatz-Layer als Opt-In. */
+/** Default: Kern-Struktur sichtbar; Prozesse/Modi/Kanäle opt-in. */
 const DEFAULT_ACTIVE: Group[] = [
   "governance", "operations", "advisory", "services", "representation", "external", "clients",
 ];
 
 function Chart() {
   const [active, setActive] = useState<Set<Group>>(new Set(DEFAULT_ACTIVE));
-  const graph = useMemo(() => buildGraph(active), [active]);
+  const [activeProcess, setActiveProcess] = useState<string | null>(null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<{ node: OrgNodeT }>(graph.nodes as Node[]);
+  const highlightIds = useMemo(() => {
+    if (activeProcess) return new Set(PROCESSES[activeProcess]?.involves ?? []);
+    return undefined;
+  }, [activeProcess]);
+
+  const dimmIds = useMemo(() => {
+    if (!activeProcess) return undefined;
+    const involved = new Set(PROCESSES[activeProcess]?.involves ?? []);
+    const toDim = new Set<string>();
+    for (const n of NODES) if (!involved.has(n.id)) toDim.add(n.id);
+    return toDim;
+  }, [activeProcess]);
+
+  const graph = useMemo(
+    () => buildGraph({ activeGroups: active, highlightIds, dimmIds }),
+    [active, highlightIds, dimmIds]
+  );
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<{ node: OrgNodeT; highlighted?: boolean; dimmed?: boolean }>(graph.nodes as Node[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges as Edge[]);
   const [selected, setSelected] = useState<OrgNodeT | null>(null);
   const [query, setQuery] = useState("");
   const [dark, setDark] = useState<boolean>(false);
   const { fitView } = useReactFlow();
 
-  // Bei Gruppen-Toggle komplett neu layouten
   useEffect(() => {
     setNodes(graph.nodes as Node[]);
     setEdges(graph.edges as Edge[]);
-    // Fit im nächsten Frame, wenn React Flow die neuen Nodes gesetzt hat
     requestAnimationFrame(() => fitView({ padding: 0.2, duration: 300 }));
   }, [graph, setNodes, setEdges, fitView]);
 
@@ -66,7 +83,6 @@ function Chart() {
     });
   };
 
-  // Suche: dimmt nicht-matchende Knoten
   useEffect(() => {
     const q = query.trim().toLowerCase();
     setNodes((nds) =>
@@ -89,11 +105,11 @@ function Chart() {
   }, []);
 
   return (
-    <div className="h-dvh grid grid-rows-[auto_1fr]">
+    <div className="h-dvh grid grid-rows-[auto_auto_1fr]">
       <header className="border-b border-line dark:border-line-dark bg-white/70 dark:bg-ink-soft/70 backdrop-blur">
         <div className="px-4 py-3 flex items-center gap-3 flex-wrap">
           <div className="mr-2">
-            <div className="text-[11px] font-mono uppercase tracking-widest text-ink-soft/60 dark:text-paper/50">Organigramm</div>
+            <div className="text-[11px] font-mono uppercase tracking-widest text-ink-soft/60 dark:text-paper/50">Organigramm · interaktiv</div>
             <div className="font-semibold text-ink dark:text-paper leading-tight">
               {ORG_META.name}{" "}
               <span className="text-ink-soft/60 dark:text-paper/60 font-normal">+ Betriebsrat</span>
@@ -105,7 +121,7 @@ function Chart() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Suche: Person, Rolle, Abteilung, Gesetz…"
+              placeholder="Suche: Person, Rolle, Abteilung, Gesetz, Prozess…"
               className="w-full px-3 py-1.5 text-sm rounded-lg border border-line dark:border-line-dark bg-white dark:bg-ink focus:outline-none focus:ring-2 focus:ring-accent/50"
             />
           </div>
@@ -122,7 +138,7 @@ function Chart() {
           </div>
         </div>
 
-        {/* Gruppen-Chips: klickbar als Layer-Toggle */}
+        {/* Gruppen-Chips (Ebenen) */}
         <div className="px-4 pb-3 flex flex-wrap items-center gap-1.5 text-[11px]">
           <span className="text-ink-soft/60 dark:text-paper/50 mr-1">Ebenen:</span>
           {ALL_GROUPS.map((k) => {
@@ -152,7 +168,7 @@ function Chart() {
             onClick={() => setActive(new Set(ALL_GROUPS))}
             className="ml-1 rounded-full border border-accent/30 text-accent px-2 py-0.5 hover:bg-accent-soft/60"
           >
-            Alles anzeigen
+            Alles
           </button>
           <button
             onClick={() => setActive(new Set(DEFAULT_ACTIVE))}
@@ -160,10 +176,32 @@ function Chart() {
           >
             Standard
           </button>
+          <button
+            onClick={() => setActive(new Set(["process","mode","channel","advisory","operations","assistance","clients"] as Group[]))}
+            className="rounded-full border border-danger/30 text-danger px-2 py-0.5 hover:bg-danger-soft/60"
+          >
+            Fokus: Vermittlung
+          </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_380px] min-h-0">
+      {/* Prozess-Leiste (immer sichtbar, kompakt) */}
+      <ProcessPanel
+        activeProcess={activeProcess}
+        onSelect={(id) => {
+          setActiveProcess(id);
+          if (id) {
+            setActive((prev) => {
+              const next = new Set(prev);
+              (["process", "mode", "channel"] as Group[]).forEach((g) => next.add(g));
+              return next;
+            });
+          }
+        }}
+        onHover={() => { /* noop — hover-Highlighting in v1 deaktiviert */ }}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_400px] min-h-0">
         <div className="min-h-0">
           <ReactFlow
             nodes={nodes}
@@ -204,29 +242,11 @@ function Chart() {
             </div>
             <div className="mt-1 flex justify-between">
               <span>{nodes.length} sichtbare Knoten</span>
-              <span>{Object.keys(SOURCES).length} Quellen</span>
+              <span>{Object.keys(SOURCES).length} Quellen · {Object.keys(PROCESSES).length} Prozesse</span>
             </div>
           </div>
         </aside>
       </div>
-
-      <footer className="border-t border-line dark:border-line-dark bg-white dark:bg-ink-soft px-4 py-3 text-[11.5px]">
-        <details>
-          <summary className="cursor-pointer text-ink-soft/70 dark:text-paper/60 font-medium">
-            Alle Quellen ({Object.keys(SOURCES).length})
-          </summary>
-          <ol className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 list-none">
-            {Object.values(SOURCES).map((s) => (
-              <li key={s.id} className="flex items-baseline gap-2">
-                <span className="font-mono text-ink-soft/40 dark:text-paper/30 w-8 shrink-0">[{s.id}]</span>
-                <a href={s.url} target="_blank" rel="noopener" className="text-accent hover:underline break-words">
-                  {s.title}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </details>
-      </footer>
     </div>
   );
 }
