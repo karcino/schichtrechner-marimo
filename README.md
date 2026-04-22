@@ -11,6 +11,13 @@ Zwei Varianten:
   mit mehreren Schichten, CSV-Import aus Schichtplaner-Apps, gecappter Wechselschichtzulage
   (§ 7 Abs. 5: max 105 EUR/Monat) und exaktem Monats-Netto.
 
+Zusatz:
+
+- **Organigramm** (`organigramm/site/` → Pages `/organigramm/`) — interaktives
+  Organigramm von ambulante dienste e.V. und seines Betriebsrats,
+  mit Quellenbelegen pro Knoten. Siehe `organigramm/HANDOFF.md` für die
+  Datenbasis und das lokale Scrape-Skript.
+
 Gemeinsame Berechnungslogik liegt in `htv_calc.py` und wird beim WASM-Build per `build_wasm.py`
 in beide Notebooks inlined (Pyodide importiert keine externen Python-Dateien).
 

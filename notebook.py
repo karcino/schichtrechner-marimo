@@ -58,6 +58,8 @@ def _(mo):
         > Ergebnis automatisch neu berechnet — kein "Berechnen"-Button noetig.
 
         > 📅 **Monatsabrechnung simulieren?** → [Monats-Rechner](./monat/)
+        >
+        > 🏛 **Wer ist ambulante dienste e.V.?** → [Organigramm](./organigramm/)
         """
     )
     return

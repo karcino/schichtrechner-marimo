@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organigramm · ambulante dienste e.V.</title>
+  <meta name="description" content="Interaktives Organigramm von ambulante dienste e.V. und seinem Betriebsrat, mit Quellenbelegen." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="crumbs">
+        <a href="../">◂ Schichtrechner</a>
+        <span class="sep">·</span>
+        <strong>Organigramm ambulante dienste e.V.</strong>
+      </div>
+      <div class="meta">
+        Stand <time datetime="2026-04-22">22.04.2026</time>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section class="intro">
+      <h1>Organigramm <span class="sub">ambulante dienste e.V. + Betriebsrat</span></h1>
+      <p>
+        Interaktive Darstellung der Organisationsstruktur von
+        <a href="https://www.adberlin.com/neu/" target="_blank" rel="noopener">ambulante dienste e.V.</a>
+        und seines <a href="https://betriebsrat-ad.de/" target="_blank" rel="noopener">Betriebsrats</a>.
+        Jeder Knoten ist klickbar &rarr; die rechte Spalte zeigt Details und die zugrundeliegende
+        Quelle. Felder, die aus öffentlich zugänglichen Snippets rekonstruiert, aber noch nicht
+        direkt auf der Originalseite verifiziert sind, sind mit <span class="badge warn">verify</span> markiert.
+      </p>
+      <div class="legend">
+        <span class="dot verified"></span> verifiziert (Impressum / offizielle Seite)
+        <span class="dot snippet"></span> aus Such-Snippet rekonstruiert
+        <span class="dot archive"></span> aus Archiv / ältere Quelle
+      </div>
+    </section>
+
+    <div class="chart-area">
+      <div class="chart-toolbar">
+        <button id="zoomOut" class="btn">−</button>
+        <button id="zoomReset" class="btn">100%</button>
+        <button id="zoomIn" class="btn">+</button>
+        <span class="hint">Klick auf Knoten → Details rechts</span>
+      </div>
+      <div class="chart-viewport">
+        <div id="chart" class="mermaid"></div>
+      </div>
+    </div>
+
+    <aside class="details" id="details">
+      <div class="placeholder">
+        <h2>Details</h2>
+        <p>Wähle einen Knoten im Organigramm, um Rolle, Verantwortung und Quelle zu sehen.</p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="wrap sources">
+    <h2>Quellen</h2>
+    <ol id="sourcesList"></ol>
+    <p class="disclaimer">
+      Alle Angaben stammen aus öffentlich zugänglichen Web-Quellen (Stand 22.04.2026) und wurden
+      zum Teil aus Suchmaschinen-Snippets rekonstruiert. Diese Darstellung dient ausschließlich der
+      Orientierung; verbindlich sind die Eintragungen im Vereinsregister beim Amtsgericht
+      Charlottenburg und die offiziellen Informationen auf
+      <a href="https://www.adberlin.com/neu/impressum" target="_blank" rel="noopener">adberlin.com/neu/impressum</a>.
+    </p>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap">
+      Gebaut als Teil von <a href="../">schichtrechner-marimo</a> ·
+      <a href="https://github.com/karcino/schichtrechner-marimo/tree/main/organigramm" target="_blank" rel="noopener">Repo</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

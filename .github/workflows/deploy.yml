@@ -37,6 +37,11 @@ jobs:
       - name: Export Monats-Rechner to WebAssembly
         run: uv run marimo export html-wasm _build/notebook_monat.py -o public/monat --mode run
 
+      - name: Copy Organigramm (static site)
+        run: |
+          mkdir -p public/organigramm
+          cp -r organigramm/site/. public/organigramm/
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
