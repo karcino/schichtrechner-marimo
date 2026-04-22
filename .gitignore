@@ -26,3 +26,22 @@ _build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Organigramm-Ingestion — Rohdaten und Private-Enrichments dürfen nicht ins Repo
+organigramm/raw/
+organigramm/ingest/.env
+organigramm/ingest/.ob1-secrets
+organigramm-vercel/lib/enrichments.private.ts
+organigramm-vercel/lib/enrichments.generated.ts
+*.eml
+*.mbox
+
+# Paul's lokaler Mail-Ordner im Repo-Root (Trailing-Space-Variante + Standard)
+/Mail/
+"/Mail /"
+/mail/
+
+# Node (organigramm-vercel)
+node_modules/
+.next/
+.vercel

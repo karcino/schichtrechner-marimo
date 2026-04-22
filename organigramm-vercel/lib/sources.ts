@@ -1,11 +1,29 @@
+export type SourceKind =
+  | "primary"
+  | "secondary"
+  | "archive"
+  | "legal"
+  | "internal"
+  | "email-private"     // Nur im private-Build sichtbar; Label fix "Mailaustausch mit Arbeitgeber".
+  | "shift-agg"         // Anonymisierte Schichtplaner-Aggregate (Spalten-Whitelist fail-closed).
+  | "osint-register"    // Öffentliches Register (Vereinsregister, Handelsregister, Paritätischer, Hilfelotse, TopQM).
+  | "financial-public"  // Öffentliche Finanzquelle (Bundesanzeiger, Jahresabschlüsse, Paritätischer-Berichte).
+  | "ob1-synthesis";    // Zusammenfassung aus OB1 über mehrere Einzelquellen.
+
 export type Source = {
   id: string;
   title: string;
   url: string;
   /** Stichdatum: Wann die URL das letzte Mal überprüft wurde (YYYY-MM-DD). */
   accessed?: string;
-  /** Art der Quelle: offizielle Primärquelle, Sekundärquelle, Archiv, Gesetzes-/Vertragstext. */
-  kind?: "primary" | "secondary" | "archive" | "legal" | "internal";
+  /** Art der Quelle. */
+  kind?: SourceKind;
+  /** Dual-Build-Gate: "private" wird im public-Build rausgefiltert. Default = public. */
+  visibility?: "public" | "private";
+  /** IDs von zugrundeliegenden OB1-Einträgen (für kind="ob1-synthesis" oder "email-private"). */
+  ob1_refs?: string[];
+  /** Fix-Label-Override z.B. "Mailaustausch mit Arbeitgeber" — überschreibt title in der UI. */
+  display_label_override?: string;
 };
 
 export const SOURCES: Record<string, Source> = {
@@ -68,4 +86,19 @@ export const SOURCES: Record<string, Source> = {
   // ── Interne / Software ───────────────────────────────────────────────
   S47: { id: "S47", title: "HiCare (OPTADATA) – Pflege-Verwaltungssoftware",                 url: "https://www.optadata.de/pflegesoftware/",                                                                                 accessed: "2026-04-22", kind: "secondary" },
   S48: { id: "S48", title: "ad e.V. – Schichtrechner / HTV-Rechner (dieses Repo)",           url: "https://karcino.github.io/schichtrechner-marimo/",                                                                        accessed: "2026-04-22", kind: "internal" },
+
+  // ── OSINT-Register (Sub-Projekt D) ────────────────────────────────────
+  S49: { id: "S49", title: "Handelsregisterauszug Neue Lebenswege GmbH (HRB 145571 B)",       url: "https://www.handelsregister-online.de/handelsregisterauszug/Berlin/Charlottenburg-Berlin/Neue-Lebenswege-GmbH",            accessed: "2026-04-22", kind: "osint-register" },
+  S50: { id: "S50", title: "NorthData – Neue Lebenswege GmbH (HRB 145571 B Charlottenburg)",  url: "https://www.northdata.com/Neue%20Lebenswege%20GmbH,%20Berlin/Amtsgericht%20Charlottenburg%20(Berlin)%20HRB%20145571%20B",  accessed: "2026-04-23", kind: "osint-register" },
+  S51: { id: "S51", title: "Gemeinsames Registerportal der Länder (Recherche-Einstieg)",      url: "https://www.handelsregister.de/rp_web/mask.do?Typ=n",                                                                     accessed: "2026-04-22", kind: "osint-register" },
+
+  // ── OSINT-Runde 2 ─────────────────────────────────────────────────────
+  S52: { id: "S52", title: "Cooperative Mensch eG – Homepage",                                url: "https://www.cooperative-mensch.de/",                                                                                      accessed: "2026-04-23", kind: "primary" },
+  S53: { id: "S53", title: "Wikipedia – Cooperative Mensch (ehem. Spastikerhilfe Berlin)",    url: "https://de.wikipedia.org/wiki/Cooperative_Mensch",                                                                         accessed: "2026-04-23", kind: "secondary" },
+  S54: { id: "S54", title: "Paritätischer – ad:bewegt-Ausstellung (Geschichte ad e.V.)",      url: "https://www.paritaet-berlin.de/aktuelles/detail/adbewegt-vom-musterkrueppelchen-zur-persoenlichen-assistenz",             accessed: "2026-04-23", kind: "secondary" },
+  S55: { id: "S55", title: "Berliner Zuwendungsdatenbank (Recherche-Einstieg)",               url: "https://www.berlin.de/sen/finanzen/service/zuwendungsdatenbank/",                                                         accessed: "2026-04-23", kind: "osint-register" },
+  S56: { id: "S56", title: "Familienratgeber – ad e.V. Einsatzstelle",                        url: "https://www.familienratgeber.de/beratung-und-hilfen/adressen-vor-ort/125172",                                              accessed: "2026-04-23", kind: "secondary" },
+
+  // ── Interne BR-Quellen (Paul's Notion-Workspace — kind="internal") ─────
+  S57: { id: "S57", title: "BR-Rechenschaftsbericht 2022-2026 + Betriebsversammlung-Protokoll (Notion)", url: "https://www.notion.so/shinyfog/Ad-betriebsversammlung-34a34722aadb807b9635e2e1babf8999", accessed: "2026-04-23", kind: "internal" },
 };

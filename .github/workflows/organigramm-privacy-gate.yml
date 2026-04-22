@@ -1,0 +1,59 @@
+name: Organigramm Privacy Gate
+
+# Zusaetzliche Verteidigungslinie: baut die public-Variante und sucht im
+# Output nach verbotenen Markern aus privaten Enrichments. Schlaegt fehl,
+# wenn Email-Labels oder private-Kind-Strings auftauchen.
+#
+# Security: verwendet KEINE user-controlled Event-Inputs in run:-Commands.
+# Nur npm-Scripts + festverdrahtete Pfade. Keine Injection-Flaeche.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "organigramm-vercel/**"
+      - ".github/workflows/organigramm-privacy-gate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "organigramm-vercel/**"
+      - ".github/workflows/organigramm-privacy-gate.yml"
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: organigramm-vercel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: organigramm-vercel/package-lock.json
+
+      - name: Assert no private enrichments file commited
+        run: |
+          if [ -f "lib/enrichments.private.ts" ]; then
+            echo "::error::enrichments.private.ts darf nicht commited werden."
+            exit 1
+          fi
+          echo "OK: keine private-Datei commited."
+
+      - name: Install
+        run: npm ci
+
+      - name: Build public (explicitly)
+        run: npm run build:public
+
+      - name: Leak check
+        run: npm run check:no-private-leaks
+
+      - name: Assert generated file is gitignored in effect
+        run: |
+          if git ls-files | grep -q "enrichments.generated.ts"; then
+            echo "::error::enrichments.generated.ts ist tracked — .gitignore defekt."
+            exit 1
+          fi
+          echo "OK: generated-Datei ist nicht tracked."

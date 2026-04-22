@@ -1,0 +1,36 @@
+name: Organigramm Ingest Privacy Tests
+
+# Python-seitige Verteidigungslinie: laeuft die Schichtplaner-Privacy-
+# Filter-Tests auf jedem PR. Muss gruen sein, bevor der fail-closed
+# Whitelist-Mechanismus auf echte Daten losgelassen wird.
+#
+# Security: verwendet KEINE user-controlled Event-Inputs in run:-Commands.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "organigramm/ingest/**"
+      - "pyproject.toml"
+      - ".github/workflows/organigramm-ingest-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "organigramm/ingest/**"
+      - "pyproject.toml"
+      - ".github/workflows/organigramm-ingest-tests.yml"
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install Python + deps
+        run: uv sync --group dev
+
+      - name: Run Schichtplaner Privacy-Filter Tests
+        run: uv run pytest organigramm/ingest/tests/ -v

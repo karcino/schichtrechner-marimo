@@ -1,8 +1,8 @@
 import dynamic from "next/dynamic";
 
-// React Flow muss client-side laden, da es SVG-Layout im Browser aufbaut.
-const OrgChart = dynamic(() => import("@/components/OrgChart"), { ssr: false });
+// Client-only: ViewSwitcher mountet React-Flow + RACI-Matrix je nach Tab.
+const ViewSwitcher = dynamic(() => import("@/components/ViewSwitcher"), { ssr: false });
 
 export default function Page() {
-  return <OrgChart />;
+  return <ViewSwitcher />;
 }

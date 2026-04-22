@@ -388,7 +388,7 @@ export const NODES: OrgNode[] = [
 
   // ── Beratungsbüros ──────────────────────────────────────────────────────
   { id: "BB",  label: "Beratungsbüros", role: "Dezentrale Beratung & Vermittlung",
-    description: "Drei Büros (Süd, West, Nord/Ost). Sozialarbeitende werden vom Büropersonal unterstützt.",
+    description: "Drei Büros: Süd, West, Nordost. Sozialarbeitende werden vom Büropersonal unterstützt.",
     verify: "verified", group: "advisory", sources: ["S5"] },
 
   { id: "BBS", label: "Beratungsbüro Süd", role: "Gneisenaustr. 2a, Kreuzberg (Mehringhof)",
@@ -400,9 +400,9 @@ export const NODES: OrgNode[] = [
     description: "Adresse und Leitung: lokal zu prüfen.",
     verify: "inferred", group: "advisory", sources: ["S5"] },
 
-  { id: "BBN", label: "Beratungsbüro Nord/Ost", role: "Beratungsbüro",
-    description: "Adresse und Leitung: lokal zu prüfen.",
-    verify: "inferred", group: "advisory", sources: ["S5"] },
+  { id: "BBN", label: "Beratungsbüro Nordost", role: "Beratungsbüro",
+    description: "Name bestätigt aus Paul's Email-Archiv als „Beratungsbüro Nordost\" (nicht „Nord/Ost\"). Adresse und Leitung: lokal zu prüfen.",
+    verify: "verified", group: "advisory", sources: ["S5"] },
 
   // Rollen in den Beratungsbüros (Mittelbau – ohne Namen)
   { id: "BB_SOZ",   label: "Sozialarbeit (Büro)", role: "Sozialpädagog*innen",
@@ -428,9 +428,9 @@ export const NODES: OrgNode[] = [
     verify: "verified", group: "clients", sources: ["S11","S33"], citations: ["SGB9_29"] },
 
   // ── Assistenz-Formen ────────────────────────────────────────────────────
-  { id: "ASS",    label: "Persönliche Assistenz", role: "Kerngeschäft · 24/7",
-    description: "Unterstützung in allen Lebensbereichen: Körperpflege, Ernährung, Haushalt, Kommunikation. Einsätze 24/7 in wechselnden Teams.",
-    verify: "verified", group: "assistance", sources: ["S29","S10"], citations: ["HTV_7_1","HTV_7_6"] },
+  { id: "ASS",    label: "Persönliche Assistenz", role: "Kerngeschäft · 24/7 · LK 32",
+    description: "Unterstützung in allen Lebensbereichen: Körperpflege, Ernährung, Haushalt, Kommunikation. Einsätze 24/7 in wechselnden Teams. Abgerechnet als Leistungskomplex 32 (LK 32) gegenüber Kostenträgern. Konzeptioneller Kern laut Leitbild (S7): 5 Kompetenzen des/der Assistenznehmer*in — (1) Personalkompetenz: Auswahl aus MitarbeiterInnenpool; (2) Zeitkompetenz: wann gearbeitet wird; (3) Ortskompetenz: wo; (4) Anleitungskompetenz: wie; (5) Finanzkompetenz: Verwendung der Mittel. Auch Assistent*innen haben das Recht, Einsätze abzulehnen — Gegenseitigkeit ist Teil des Selbstverständnisses.",
+    verify: "verified", group: "assistance", sources: ["S7","S29","S10"], citations: ["HTV_7_1","HTV_7_6"] },
   { id: "ASS_BASE",   label: "Grundassistenz",          role: "Körperpflege · Ernährung · Haushalt",          description: "Kern-Assistenzleistungen im Alltag.", verify: "verified", group: "assistance", sources: ["S29"] },
   { id: "ASS_COMM",   label: "Kommunikations­assistenz", role: "Kommunikation · Teilhabe",                    description: "Unterstützung bei der Kommunikation mit dem Umfeld.", verify: "verified", group: "assistance", sources: ["S29"] },
   { id: "ASS_NIGHT",  label: "Nachtassistenz",          role: "Nacht / Bereitschaft",                          description: "Begleitung in der Nacht, teilweise als Bereitschaft. HTV § 7 Abs. 1 b regelt Nachtzuschläge.", verify: "verified", group: "assistance", sources: ["S16"], citations: ["HTV_7_1","HTV_7_5"] },
@@ -455,11 +455,26 @@ export const NODES: OrgNode[] = [
     verify: "verified", group: "services", sources: ["S1","S10","S11","S19","S29"] },
 
   // ── Interessenvertretung ────────────────────────────────────────────────
-  { id: "BR",  label: "Betriebsrat", role: "Mitbestimmung nach BetrVG",
-    description: "Büros: Urbanstr. 100, 10967 Berlin · Wilhelm-Kabus-Str. 21-35, 10829 Berlin. Tel. 030-69597578, br@betriebsrat-ad.de. Mo+Fr 10–13, Mi 12–15 Uhr. Überwacht HTV-Einhaltung und Dienstplan-Mitbestimmung.",
-    verify: "verified", group: "representation", sources: ["S12","S13"],
+  { id: "BR",  label: "Betriebsrat", role: "Mitbestimmung nach BetrVG · 13 Mitglieder · Amtszeit 2022-2026",
+    description: "Büros: Urbanstr. 100, 10967 Berlin · Wilhelm-Kabus-Str. 21-35, 10829 Berlin. Tel. 030-69597578, br@betriebsrat-ad.de. Mo+Fr 10–13, Mi 12–15 Uhr. Überwacht HTV-Einhaltung und Dienstplan-Mitbestimmung. Konstituierende Sitzung 17.05.2022. Laut BR-Rechenschaftsbericht 2022-2026: 208 Sitzungen + Ausschüsse (wöchentlich), 15 Betriebsversammlungen, Newsletter 145-178, 12 Verluste von 13 Gewählten (6 Beendigungen, 4 Rücktritte, 1 Arbeitsplatzwechsel, 1 Rente). Fünf feste Ausschüsse: Arbeits- und Sicherheit, Dienstplan, AG Fortbildung, Tarifkommission-Beteiligung, neu im Aufbau IKT-Ausschuss.",
+    verify: "verified", group: "representation", sources: ["S12","S13","S57"],
     address: "Urbanstr. 100, 10967 Berlin · Wilhelm-Kabus-Str. 21-35, 10829 Berlin",
     citations: ["BETRVG_87","BETRVG_80"] },
+  { id: "SBV", label: "Schwerbehindertenvertretung", role: "Thomas Sprichler · seit Januar 2024",
+    description: "Gewählt im Januar 2024. Arbeitet mit BR zusammen, eigene Mitbestimmungsrechte nach SGB IX § 178 bei personellen Einzelmaßnahmen schwerbehinderter Beschäftigter.",
+    verify: "verified", group: "representation", sources: ["S57"] },
+  { id: "BR_ARBSICH", label: "Arbeits- und Sicherheitsausschuss", role: "BR-Ausschuss · Arbeitsschutz",
+    description: "Mit Unterarbeitsgruppen: Gefährdungsbeurteilung sowie Stelle gegen sexualisierte Diskriminierung und Gewalt. Verhandelt BV zur Vertrauensstelle (Stand 04/2026: kurz vor Abschluss).",
+    verify: "verified", group: "representation", sources: ["S57"] },
+  { id: "BR_DIENSTPLAN", label: "Dienstplanausschuss", role: "BR-Ausschuss · 2×/Monat",
+    description: "Tagt mittlerweile mindestens zweimal monatlich. Bearbeitet Dienstplan-Einzelfälle: Stundenmangel, Überlast, Verfahrensdauer-Deckelung auf 6 Monate pro Person. Stand 04/2026: 61 Fälle (ursprünglich max. 14 Fälle geplant).",
+    verify: "verified", group: "representation", sources: ["S57"] },
+  { id: "BR_AG_FB", label: "AG innerbetriebliche Fortbildung", role: "BR-AG · mit Leitung",
+    description: "Regelmäßige Zusammenarbeit mit Leitung. Plätze: 2023: 2.358 · 2024: 8.348 · 2025: 5.420. 25-26 neue Formate. Problem: Auslastung nur 60-75% trotz Anmeldungen.",
+    verify: "verified", group: "representation", sources: ["S57"] },
+  { id: "BR_IKT", label: "IKT-Ausschuss", role: "BR-Ausschuss · im Aufbau 04/2026",
+    description: "Noch zu etablieren: gemeinsame Bewertung durch Management + BR, welches Verfahren pro IT-System unter der Rahmen-BV anzuwenden ist. Ergebnis aus Rahmen-BV-Verhandlungsrunde 2025/2026.",
+    verify: "inferred", group: "representation", sources: ["S57"] },
   { id: "TK",  label: "Tarifkommission", role: "Haustarifverhandlungen ad + NLW",
     description: "Verhandelt den Haustarifvertrag persönliche Assistenz (HTV). Gewerkschaftlich begleitet durch ver.di.",
     verify: "verified", group: "representation", sources: ["S15","S16","S17","S24"], citations: ["HTV_7_6"] },
@@ -471,12 +486,16 @@ export const NODES: OrgNode[] = [
     verify: "verified", group: "representation", sources: ["S15","S24"] },
 
   // ── Verbunden / extern ──────────────────────────────────────────────────
-  { id: "NLW", label: "Neue Lebenswege GmbH", role: "Verbundenes Unternehmen",
-    description: "Gemeinsame Tarifkampagne mit ad e.V. Genaue gesellschaftsrechtliche Beziehung öffentlich nicht dokumentiert.",
-    verify: "inferred", group: "external", sources: ["S15","S17"] },
+  { id: "NLW", label: "Neue Lebenswege GmbH", role: "HRB 145571 B · Tochter von Cooperative Mensch eG",
+    description: "gGmbH, gegründet 02.11.2012, AG Charlottenburg (HRB 145571 B). Sitz: Zimmerstr. 26-27, 10969 Berlin (ehem. Kurfürstenstr. 75, 10787). GF: Georg Dudaschwili (seit Juni 2021). Stammkapital 25.000 EUR. Gesellschafter: Cooperative Mensch eG (seit spätestens 2014, vorher Spastikerhilfe Berlin eG). Zweck laut HR: Integration behinderter Menschen, Förderung der Wohlfahrt, Bildung, Jugend-/Altenpflege. Verbunden mit ad e.V. nur über den gemeinsamen Haustarifvertrag (Tarifkommission ver.di) — KEINE Konzern- oder Gesellschafter-Verbindung zu ad.",
+    verify: "verified", group: "external", sources: ["S15","S17","S49","S50"],
+    address: "Zimmerstr. 26-27, 10969 Berlin" },
+  { id: "COOP", label: "Cooperative Mensch eG", role: "Genossenschaft · 25+ Einrichtungen",
+    description: "Freier Träger der Berliner Behindertenhilfe. Genossenschaft, gegründet 1990 als Spastikerhilfe Berlin eG (die wiederum aus einer 1958 gegründeten Eltern-Initiative hervorging). 2018 umbenannt in Cooperative Mensch eG. Betreibt in Berlin 25+ Einrichtungen: Wohneinrichtungen, Tagesförderstätten, Werkstätten, Beratung, ambulante Angebote. Mutter-Genossenschaft der Neuen Lebenswege GmbH. 2021 Fusion mit Lebenswege Wohnprojekte GmbH. KEIN gesellschaftsrechtlicher Bezug zu ad e.V.",
+    verify: "verified", group: "external", sources: ["S52","S53"] },
   { id: "DV",  label: "Paritätischer Berlin", role: "Dachverband",
-    description: "ad e.V. ist Mitglied im Paritätischen Wohlfahrtsverband Landesverband Berlin.",
-    verify: "inferred", group: "external", sources: ["S20"] },
+    description: "ad e.V. ist Mitglied im Paritätischen Wohlfahrtsverband Landesverband Berlin. Paritätischer veröffentlichte 2021/22 eine digitale Ausstellung „ad:bewegt! – vom Musterkrüppelchen zur Persönlichen Assistenz\" zur Geschichte des Vereins.",
+    verify: "verified", group: "external", sources: ["S20","S54"] },
 
   // ── Kostenträger ────────────────────────────────────────────────────────
   { id: "F_SEN", label: "Senatsverw. Soziales", role: "EGH-Träger Berlin",
@@ -528,8 +547,20 @@ export const NODES: OrgNode[] = [
     description: "Teilweise für kurzfristige Vermittlungsanfragen. Wichtig: aus Datenschutz­gründen (Art. 9 DSGVO) werden Kund*innen-Adressen NICHT per SMS versendet — nur Namen/Initialen, Zeitfenster. Adressen & Details folgen telefonisch erst nach Zusage.",
     verify: "verified", group: "channel", sources: ["S45"], citations: ["DSGVO_9"] },
   { id: "CH_HICARE", label: "✉ HiCare",                role: "Interne Verwaltungs­software",
-    description: "Zentrales Verwaltungsprogramm für Dienstpläne, Kund*innen- und Assistenz­stammdaten, Schicht­klassifikation (Nacht, KV, Wechselschicht), Export in die Lohnabrechnung. Zugriffsrechte rollen­basiert (BB_COORD, PA, FB, PDL).",
-    verify: "verified", group: "channel", sources: ["S47"], citations: ["BDSG_26","DSGVO_9"] },
+    description: "Zentrales Verwaltungsprogramm für Dienstpläne, Kund*innen- und Assistenz­stammdaten, Schicht­klassifikation (Nacht, KV, Wechselschicht), Export in die Lohnabrechnung. Zugriffsrechte rollen­basiert (BB_COORD, PA, FB, PDL). Eigene Einzel-BV unter der Rahmen-BV für technische Anlagen. Historisch zu großzügige Einsichtsrechte (Besuchshistorie) wurden in der BV-Verhandlung 2025/2026 eingeschränkt.",
+    verify: "verified", group: "channel", sources: ["S47","S57"], citations: ["BDSG_26","DSGVO_9"] },
+  { id: "CH_NEXTCLOUD", label: "✉ NextCloud",          role: "Interner Dateiserver",
+    description: "Selbst-gehosted (oder gehosted) NextCloud-Instanz für Dokumentablage. Gemeinsame Verzeichnisse wurden 2023 vom BR vorläufig untersagt wegen ungeklärter Datenschutz-Fragen (wer trägt ein, löscht, hat Einblick).",
+    verify: "verified", group: "channel", sources: ["S57"] },
+  { id: "CH_LEXCLOUD", label: "✉ LexCloud",            role: "Externe Cloud-Plattform",
+    description: "Eine von mehreren technischen Anlagen, die unter die Rahmen-BV fallen. Details zur genauen Funktion nicht öffentlich dokumentiert.",
+    verify: "inferred", group: "channel", sources: ["S57"] },
+  { id: "CH_HEICHE", label: "✉ Heiche",                 role: "Dienstplanungsprogramm",
+    description: "Ein Dienstplanungsprogramm, das den Dienstplanausschuss 2025 mehrfach beschäftigt hat. Verhältnis zu HiCare unklar (Ersatz? Ergänzung?).",
+    verify: "inferred", group: "channel", sources: ["S57"] },
+  { id: "CH_DPROCESS", label: "✉ D-Process",           role: "Mitarbeitenden-Befragungs-Tool",
+    description: "Plattform für die Durchführung anonymer Arbeitsplatzbefragungen. Ersetzt ab 2026 die schlecht besuchten Team-Meeting-Befragungen.",
+    verify: "verified", group: "channel", sources: ["S57"] },
   { id: "CH_TEAM",   label: "✉ Team-Treffen",          role: "Monatlich · physisch",
     description: "Team-Treffen im Beratungsbüro/Kund*innen-Team. Abstimmung von Schichten, Übergabe, Supervision.",
     verify: "inferred", group: "channel", sources: ["S4","S5"] },
@@ -581,6 +612,15 @@ export const EDGES: OrgEdge[] = [
   { from: "BR", to: "BB",  label: "vertritt",  verify: "verified" },
   { from: "TK", to: "GF",  label: "Haustarif", verify: "verified" },
   { from: "TK", to: "NLW", label: "Haustarif", verify: "verified" },
+  { from: "COOP", to: "NLW", label: "Gesellschafter", verify: "verified" },
+
+  // BR-Unter-Struktur (Notion-Protokoll S57)
+  { from: "BR", to: "BR_ARBSICH",    label: "Ausschuss", verify: "verified" },
+  { from: "BR", to: "BR_DIENSTPLAN", label: "Ausschuss", verify: "verified" },
+  { from: "BR", to: "BR_AG_FB",      label: "AG",        verify: "verified" },
+  { from: "BR", to: "BR_IKT",        label: "Ausschuss (im Aufbau)", verify: "inferred" },
+  { from: "BR", to: "TK",            label: "Beteiligung", verify: "verified" },
+  { from: "SBV", to: "PA",           label: "Mitbestimmung § 178 SGB IX", verify: "verified" },
   { from: "VDF", to: "BR", label: "stellt",    verify: "verified" },
   { from: "VERDI", to: "TK", label: "begleitet", verify: "verified" },
   { from: "VERDI", to: "VDF", label: "trägt",    verify: "verified" },
@@ -657,13 +697,14 @@ export const EDGES: OrgEdge[] = [
 export const ORG_META = {
   name: "ambulante dienste e.V.",
   founded: "1981-05-08",
-  employees: 700,
+  employees: 820,           // Stand 04/2026 (BR-Rechenschaftsbericht S57); 2022 waren es noch 720 — +100 in 4 Jahren bei 985 Einstellungen = ~50% Fluktuation.
+  assistants: 750,          // Von 830 Beschäftigten sind 750 Assistent*innen (BR-Bericht S57).
   members: 100,
   clients: 100,
   hq: "Wilhelm-Kabus-Str. 21-35, 10829 Berlin-Schöneberg",
   website: "https://www.adberlin.com/neu/",
   brWebsite: "https://betriebsrat-ad.de/",
-  updated: "2026-04-22",
+  updated: "2026-04-23",
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

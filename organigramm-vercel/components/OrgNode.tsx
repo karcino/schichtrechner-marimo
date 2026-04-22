@@ -3,6 +3,7 @@
 import { Handle, Position, NodeProps } from "reactflow";
 import type { OrgNode as OrgNodeT } from "@/lib/data";
 import { GROUPS, normalizeVerify } from "@/lib/data";
+import { enrichmentsFor } from "@/lib/enrichments";
 
 const verifyStyles: Record<"verified"|"inferred"|"assumed", string> = {
   verified: "border-accent",
@@ -24,6 +25,7 @@ export function OrgNodeCard({ data, selected }: NodeProps<{ node: OrgNodeT; high
   const v = normalizeVerify(n.verify);
   const highlighted = data.highlighted;
   const dimmed = data.dimmed;
+  const enrichCount = enrichmentsFor(n.id).length;
   return (
     <div
       style={{ width: 220, opacity: dimmed ? 0.22 : 1 }}
@@ -55,7 +57,7 @@ export function OrgNodeCard({ data, selected }: NodeProps<{ node: OrgNodeT; high
           {verifyLabel[v]}
         </span>
         <span className="text-[10px] text-ink-soft/50 dark:text-paper/40 font-mono whitespace-nowrap">
-          {n.sources.length} Q{n.citations?.length ? ` · ${n.citations.length} §` : ""}
+          {n.sources.length} Q{n.citations?.length ? ` · ${n.citations.length} §` : ""}{enrichCount ? ` · +${enrichCount}` : ""}
         </span>
       </div>
       <Handle type="source" position={Position.Bottom} className="!bg-accent !border-accent" />
