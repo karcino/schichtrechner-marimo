@@ -98,4 +98,7 @@ export const SOURCES: Record<string, Source> = {
   S54: { id: "S54", title: "Paritätischer – ad:bewegt-Ausstellung (Geschichte ad e.V.)",      url: "https://www.paritaet-berlin.de/aktuelles/detail/adbewegt-vom-musterkrueppelchen-zur-persoenlichen-assistenz",             accessed: "2026-04-23", kind: "secondary" },
   S55: { id: "S55", title: "Berliner Zuwendungsdatenbank (Recherche-Einstieg)",               url: "https://www.berlin.de/sen/finanzen/service/zuwendungsdatenbank/",                                                         accessed: "2026-04-23", kind: "osint-register" },
   S56: { id: "S56", title: "Familienratgeber – ad e.V. Einsatzstelle",                        url: "https://www.familienratgeber.de/beratung-und-hilfen/adressen-vor-ort/125172",                                              accessed: "2026-04-23", kind: "secondary" },
+
+  // ── Interne BR-Quellen (Paul's Notion-Workspace — kind="internal") ─────
+  S57: { id: "S57", title: "BR-Rechenschaftsbericht 2022-2026 + Betriebsversammlung-Protokoll (Notion)", url: "https://www.notion.so/shinyfog/Ad-betriebsversammlung-34a34722aadb807b9635e2e1babf8999", accessed: "2026-04-23", kind: "internal" },
 };
