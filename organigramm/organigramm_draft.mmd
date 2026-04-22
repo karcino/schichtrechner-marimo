@@ -1,0 +1,76 @@
+%% Organigramm ambulante dienste e.V. – Entwurf 2026-04-22
+%% Stand: aus Search-Snippets. Namen in Einsatzstelle/Beratungsbüros noch offen.
+%% Darstellung: Mermaid flowchart. Render z.B. mit `mmdc -i organigramm_draft.mmd -o organigramm.svg`.
+
+flowchart TB
+
+  subgraph VEREIN["Verein ambulante dienste e.V."]
+    direction TB
+    MV["Mitgliederversammlung<br/><i>~100 Mitglieder</i>"]
+    VS["Vorstand<br/>Aurien · Jeromin · Sühnel<br/><i>3-5 Pers., Mehrheit auf Assistenz angewiesen</i>"]
+    GF["Geschäftsführung<br/>Uta Wehde"]
+    MV --> VS
+    VS --> GF
+  end
+
+  subgraph EINSATZ["Einsatzstelle<br/>Wilhelm-Kabus-Str. 21-35, 10829 Berlin"]
+    direction TB
+    SEK["Sekretariat"]
+    VL["Verwaltungsleitung"]
+    PDL["Pflegedienstleitung"]
+    QM["Qualitätsmanagement<br/>+ Qualitätszirkel"]
+    OEA["Öffentlichkeitsarbeit"]
+    REC["Rechtsberatung"]
+
+    subgraph VERW["Verwaltung"]
+      PA["Personalabteilung"]
+      FB["Finanzbuchhaltung"]
+    end
+
+    subgraph PFLEGE["Pflege-Team"]
+      PFK["Pflegefachkräfte"]
+    end
+
+    VL --> VERW
+    PDL --> PFLEGE
+  end
+
+  subgraph BERAT["Beratungsbüros (3)"]
+    direction LR
+    BBS["Beratungsbüro Süd"]
+    BBW["Beratungsbüro West<br/>Gneisenaustr. 2a, 10961"]
+    BBN["Beratungsbüro Nord/Ost"]
+  end
+
+  subgraph LEIST["Leistungsbereiche"]
+    direction TB
+    L1["Persönliche Assistenz"]
+    L2["Persönliches Budget"]
+    L3["Eingliederungshilfe"]
+    L4["Ambulante Pflege (SGB XI)"]
+    L5["Qualifizierung / Fortbildung"]
+  end
+
+  subgraph IV["Interessenvertretung"]
+    direction TB
+    BR["Betriebsrat<br/>betriebsrat-ad.de"]
+    TK["Tarifkommission<br/>(gemeinsam mit NLW · ver.di)"]
+  end
+
+  subgraph VERB["Verbundene Strukturen"]
+    NLW["Neue Lebenswege GmbH"]
+    VDF["Ver.di & friends (BR-Liste)"]
+  end
+
+  GF --> EINSATZ
+  GF --> BERAT
+  EINSATZ --> LEIST
+  BERAT   --> LEIST
+
+  BR  -. vertritt Beschäftigte .-> EINSATZ
+  BR  -. vertritt Beschäftigte .-> BERAT
+  TK  -. Haustarif .-> GF
+  TK  -. Haustarif .-> NLW
+
+  classDef verify stroke-dasharray: 4 3,stroke:#c96;
+  class BBS,BBN verify;

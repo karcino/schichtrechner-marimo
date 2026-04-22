@@ -1,0 +1,121 @@
+# Datenbasis für das Organigramm
+# Quelle: Web-Search-Snippets (Stand 2026-04-22).
+# ACHTUNG: Felder mit "verify: true" sind aus der Session heraus nicht
+# vollständig verifiziert und müssen lokal mit echtem Seiten-Zugriff
+# bestätigt werden.
+
+organisation:
+  name: "ambulante dienste e.V."
+  kurz: "ad e.V."
+  rechtsform: "eingetragener Verein"
+  gruendung: "1981-05-08"
+  mitglieder_ca: 100
+  beschaeftigte_ca: 700        # 650 in älterer Quelle, 700+ in neueren
+  kundinnen_ca: 100
+  sitz:
+    strasse: "Wilhelm-Kabus-Str. 21-35"
+    plz: "10829"
+    stadt: "Berlin-Schöneberg"
+    bemerkung: "Umzug der Einsatzstelle Juni 2023"
+  kontakt:
+    tel: "030 / 69 59 75 -410"
+    fax: "030 / 69 59 75 -423"
+    email_sekretariat: "sekretariat@adberlin.org"
+    zeit: "Mo-Fr 8:00-16:00"
+  dachverband: "Paritätischer Wohlfahrtsverband Berlin"
+  web:
+    homepage: "https://www.adberlin.com/neu/"
+    linkedin: "https://de.linkedin.com/company/ad-berlin"
+    facebook: "https://www.facebook.com/ad.berlin/"
+
+governance:
+  mitgliederversammlung:
+    rolle: "oberstes Organ"
+  vorstand:
+    regel: "3-5 Personen; Mehrheit selbst auf Assistenz angewiesen"
+    mitglieder:
+      - name: "Ursula Aurien"
+        alias: "Uschi Aurien"
+        rolle: "Vorstand"
+        verify: true
+      - name: "Dennis Jeromin"
+        rolle: "Vorstand"
+        verify: true
+      - name: "Michael Sühnel"
+        rolle: "Vorstand"
+        verify: true
+    historisch:
+      - name: "Matthias Vernaldi"
+        rolle: "Vorstand (verstorben)"
+  geschaeftsfuehrung:
+    - name: "Uta Wehde"
+      rolle: "Geschäftsführerin"
+      verify: true
+
+einsatzstelle:
+  adresse: "Wilhelm-Kabus-Str. 21-35, 10829 Berlin-Schöneberg, Eingang 2, 1. OG"
+  funktionen:
+    - Sekretariat
+    - Geschäftsführung
+    - Verwaltungsleitung
+    - Pflegedienstleitung
+    - Team Pflegefachkräfte
+    - Personalabteilung
+    - Finanzbuchhaltung
+    - Rechtsberatung
+    - Qualitätsmanagement-Beauftragte*r
+    - Qualitätszirkel
+    - Öffentlichkeitsarbeit
+  personen: []   # lokal befüllen
+
+beratungsbueros:
+  - name: "Beratungsbüro Süd"
+    adresse: null
+    leitung: null
+    verify: true
+  - name: "Beratungsbüro West"
+    adresse: "Gneisenaustr. 2a (Mehringhof), 10961 Berlin-Kreuzberg"
+    leitung: null
+    verify: true
+  - name: "Beratungsbüro Nord/Ost"
+    adresse: null
+    leitung: null
+    verify: true
+
+leistungsbereiche:
+  - "Persönliche Assistenz"
+  - "Dienstleistungen für Persönliches Budget"
+  - "Eingliederungshilfe"
+  - "Ambulante Pflege (SGB XI)"
+  - "Qualifizierung / Fortbildung der Assistent*innen"
+
+interessenvertretung:
+  betriebsrat:
+    name: "Betriebsrat ambulante dienste e.V."
+    web: "https://betriebsrat-ad.de/"
+    archiv: "https://betriebsrat-ad.site36.net/"
+    bueros:
+      - "Urbanstr. 100, 10967 Berlin"
+      - "Wilhelm-Kabus-Str. 21-35, 10829 Berlin"
+    tel: "030-69597578"
+    email: "br@betriebsrat-ad.de"
+    oeffnungszeiten: "Mo+Fr 10-13 Uhr, Mi 12-15 Uhr"
+    mitglieder: []   # lokal befüllen
+  tarifkommission:
+    gegenseite: ["ambulante dienste e.V.", "Neue Lebenswege GmbH"]
+    gewerkschaft: "ver.di"
+    kampagnen_web: "https://verdi-ad-lw.de/"
+    mitglieder: []   # lokal befüllen
+  listen_bei_br_wahl:
+    - name: "Ver.di & friends"
+      web: "https://verdiandfriends.de/"
+
+verbundene_organisationen:
+  - name: "Neue Lebenswege GmbH"
+    beziehung: "gemeinsamer Haustarif mit ad e.V."
+    verify: true
+
+externe_quellen:
+  - "https://www.hilfelotse-berlin.de/detail/ambulante-dienste-e-v-einsatzstelle"
+  - "https://soziale-dienste.berlin.de/topqm-prod/topqw-web/Stammdaten.aspx?EIID=b846593d-e5c5-40be-9623-342c66c722e9"
+  - "https://www.paritaet-berlin.de/mitglieder/unsere-mitgliedsorganisationen"
