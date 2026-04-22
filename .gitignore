@@ -18,6 +18,13 @@ dist/
 build/
 _build/
 
+# Abgleich-Pipeline: lokale Mail-Entwuerfe + sensible Eingabedaten
+outbox/
+samples/
+*.pdf
+*.csv
+!docs/*.csv
+
 # IDE
 .vscode/
 .idea/
