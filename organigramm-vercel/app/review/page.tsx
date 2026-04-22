@@ -174,6 +174,20 @@ function ProposalCard({ proposal, reviewKey }: { proposal: ProposalRow; reviewKe
         </div>
       )}
 
+      {m.issue_url && (
+        <div className="text-xs mb-3">
+          <span className="text-ink-soft">GitHub: </span>
+          <a
+            href={m.issue_url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-accent underline"
+          >
+            Issue #{m.issue_number ?? ""}
+          </a>
+        </div>
+      )}
+
       <div className="flex items-center justify-between border-t border-ink-soft/10 pt-3 mt-2">
         <span className="text-[11px] font-mono text-ink-soft">
           id: <span className="select-all">{proposal.id}</span>

@@ -6,7 +6,8 @@
  * Nach Erfolg Redirect zurueck zu /review?key=...&status=...
  */
 import { NextResponse } from "next/server";
-import { updateProposalStatus } from "@/lib/supabase";
+import { getProposal, updateProposalStatus } from "@/lib/supabase";
+import { createProposalIssue } from "@/lib/github";
 
 const VALID_ACTIONS = new Set(["accept", "reject", "later", "pending"] as const);
 type Action = "accept" | "reject" | "later" | "pending";
@@ -38,8 +39,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unbekannte Aktion." }, { status: 400 });
   }
 
+  const newStatus = ACTION_TO_STATUS[action as Action];
+  const extras: Record<string, unknown> = {};
+
+  // Bei Accept: zusaetzlich GitHub-Issue erzeugen, damit Paul im GitHub-
+  // Web-UI die Aenderung tracken + integrieren kann. Fehlschlag bricht
+  // nicht die Status-Aenderung ab — nur Log + Hinweis.
+  if (action === "accept") {
+    try {
+      const proposal = await getProposal(id);
+      if (proposal) {
+        const issue = await createProposalIssue(proposal);
+        if (issue) {
+          extras.issue_url = issue.html_url;
+          extras.issue_number = issue.number;
+        }
+      }
+    } catch (err) {
+      console.error("createProposalIssue failed (non-fatal):", err);
+    }
+  }
+
   try {
-    await updateProposalStatus(id, ACTION_TO_STATUS[action as Action]);
+    await updateProposalStatus(id, newStatus, extras);
   } catch (err) {
     console.error("updateProposalStatus failed:", err);
     return NextResponse.json({ error: "DB-Update fehlgeschlagen." }, { status: 502 });

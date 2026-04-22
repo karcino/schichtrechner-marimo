@@ -45,6 +45,10 @@ export type ProposalRow = {
     node_id?: string | null;
     source_url?: string | null;
     submitted_at?: string;
+    decided_at?: string;
+    decided_by?: string;
+    issue_url?: string;
+    issue_number?: number;
     // Weitere OB1-Metadata-Felder (topics, people, type) werden ignoriert
     [key: string]: unknown;
   };
@@ -68,10 +72,23 @@ export async function listProposals(status?: ProposalRow["metadata"]["status"]) 
   return (data ?? []) as ProposalRow[];
 }
 
-/** Aktualisiert den Status eines Proposals. */
+/** Liefert Metadata eines einzelnen Proposals. */
+export async function getProposal(id: string): Promise<ProposalRow | null> {
+  const supa = getSupabaseAdmin();
+  const { data, error } = await supa
+    .from("thoughts")
+    .select("id, content, created_at, updated_at, metadata")
+    .eq("id", id)
+    .single();
+  if (error) return null;
+  return data as ProposalRow;
+}
+
+/** Aktualisiert den Status eines Proposals und optional weitere metadata-Felder. */
 export async function updateProposalStatus(
   id: string,
   status: "accepted" | "rejected" | "later" | "pending",
+  extras?: Record<string, unknown>,
   decidedBy?: string
 ) {
   const supa = getSupabaseAdmin();
@@ -88,6 +105,7 @@ export async function updateProposalStatus(
 
   const newMetadata = {
     ...(current?.metadata ?? {}),
+    ...(extras ?? {}),
     status,
     decided_at: new Date().toISOString(),
     decided_by: decidedBy ?? "paul",

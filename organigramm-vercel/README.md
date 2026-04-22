@@ -64,6 +64,8 @@ Kein Accounts-System, kein Tracking. Name bleibt in `localStorage`, Passwort wir
 
 `/review?key=<REVIEW_PASSWORD>` zeigt alle Proposals gefiltert nach Status (`pending`, `accepted`, `rejected`, `later`). Accept/Reject/Later-Buttons aktualisieren das Status-Metadata-Feld direkt in der Supabase-DB.
 
+**Accept → GitHub-Issue-Automation:** Wenn die drei Env-Vars `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO` gesetzt sind, erzeugt ein Klick auf "Accept" zusätzlich automatisch ein GitHub-Issue im Repo mit dem strukturierten Vorschlags-Inhalt + Kategorie-Hinweisen zur Integration in `data.ts`/`sources.ts`. Der Issue-Link taucht danach in der /review-Karte auf. Token braucht `public_repo` (oder `repo` für Private).
+
 Alternativ-Zugang via Claude-Code-MCP:
 ```
 > adberlin-brain: liste pending edit-proposals auf
