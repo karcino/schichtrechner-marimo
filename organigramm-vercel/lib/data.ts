@@ -471,9 +471,10 @@ export const NODES: OrgNode[] = [
     verify: "verified", group: "representation", sources: ["S15","S24"] },
 
   // ── Verbunden / extern ──────────────────────────────────────────────────
-  { id: "NLW", label: "Neue Lebenswege GmbH", role: "Verbundenes Unternehmen",
-    description: "Gemeinsame Tarifkampagne mit ad e.V. Genaue gesellschaftsrechtliche Beziehung öffentlich nicht dokumentiert.",
-    verify: "inferred", group: "external", sources: ["S15","S17"] },
+  { id: "NLW", label: "Neue Lebenswege GmbH", role: "HRB 145571 B · Charlottenburg",
+    description: "Eigenständige gGmbH, eingetragen beim AG Charlottenburg (HRB 145571 B). Sitz: Kurfürstenstr. 75, 10787 Berlin. Zweck laut Handelsregister: Integration behinderter Menschen, Förderung der Wohlfahrt, Bildung, Jugend-/Altenpflege. Verbunden mit ad e.V. über den gemeinsamen Haustarifvertrag (Tarifkommission ver.di). Gesellschaftsrechtliche Beziehung zu ad e.V. (Tochter? Schwester? unabhängig?) bleibt öffentlich unklar — im Handelsregister ist ad e.V. nicht als Gesellschafter gelistet.",
+    verify: "verified", group: "external", sources: ["S15","S17","S49","S50"],
+    address: "Kurfürstenstraße 75, 10787 Berlin" },
   { id: "DV",  label: "Paritätischer Berlin", role: "Dachverband",
     description: "ad e.V. ist Mitglied im Paritätischen Wohlfahrtsverband Landesverband Berlin.",
     verify: "inferred", group: "external", sources: ["S20"] },

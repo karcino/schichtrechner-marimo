@@ -86,4 +86,9 @@ export const SOURCES: Record<string, Source> = {
   // ── Interne / Software ───────────────────────────────────────────────
   S47: { id: "S47", title: "HiCare (OPTADATA) – Pflege-Verwaltungssoftware",                 url: "https://www.optadata.de/pflegesoftware/",                                                                                 accessed: "2026-04-22", kind: "secondary" },
   S48: { id: "S48", title: "ad e.V. – Schichtrechner / HTV-Rechner (dieses Repo)",           url: "https://karcino.github.io/schichtrechner-marimo/",                                                                        accessed: "2026-04-22", kind: "internal" },
+
+  // ── OSINT-Register (Sub-Projekt D) ────────────────────────────────────
+  S49: { id: "S49", title: "Handelsregisterauszug Neue Lebenswege GmbH (HRB 145571 B)",       url: "https://www.handelsregister-online.de/handelsregisterauszug/Berlin/Charlottenburg-Berlin/Neue-Lebenswege-GmbH",            accessed: "2026-04-22", kind: "osint-register" },
+  S50: { id: "S50", title: "NorthData – Neue Lebenswege GmbH (HRB 145571 B Charlottenburg)",  url: "https://www.northdata.com/Neue%20Lebenswege%20GmbH,%20Berlin/Amtsgericht%20Charlottenburg%20(Berlin)%20HRB%20145571%20B",  accessed: "2026-04-22", kind: "osint-register" },
+  S51: { id: "S51", title: "Gemeinsames Registerportal der Länder (Recherche-Einstieg)",      url: "https://www.handelsregister.de/rp_web/mask.do?Typ=n",                                                                     accessed: "2026-04-22", kind: "osint-register" },
 };
