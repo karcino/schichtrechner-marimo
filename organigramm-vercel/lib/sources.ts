@@ -1,11 +1,29 @@
+export type SourceKind =
+  | "primary"
+  | "secondary"
+  | "archive"
+  | "legal"
+  | "internal"
+  | "email-private"     // Nur im private-Build sichtbar; Label fix "Mailaustausch mit Arbeitgeber".
+  | "shift-agg"         // Anonymisierte Schichtplaner-Aggregate (Spalten-Whitelist fail-closed).
+  | "osint-register"    // Öffentliches Register (Vereinsregister, Handelsregister, Paritätischer, Hilfelotse, TopQM).
+  | "financial-public"  // Öffentliche Finanzquelle (Bundesanzeiger, Jahresabschlüsse, Paritätischer-Berichte).
+  | "ob1-synthesis";    // Zusammenfassung aus OB1 über mehrere Einzelquellen.
+
 export type Source = {
   id: string;
   title: string;
   url: string;
   /** Stichdatum: Wann die URL das letzte Mal überprüft wurde (YYYY-MM-DD). */
   accessed?: string;
-  /** Art der Quelle: offizielle Primärquelle, Sekundärquelle, Archiv, Gesetzes-/Vertragstext. */
-  kind?: "primary" | "secondary" | "archive" | "legal" | "internal";
+  /** Art der Quelle. */
+  kind?: SourceKind;
+  /** Dual-Build-Gate: "private" wird im public-Build rausgefiltert. Default = public. */
+  visibility?: "public" | "private";
+  /** IDs von zugrundeliegenden OB1-Einträgen (für kind="ob1-synthesis" oder "email-private"). */
+  ob1_refs?: string[];
+  /** Fix-Label-Override z.B. "Mailaustausch mit Arbeitgeber" — überschreibt title in der UI. */
+  display_label_override?: string;
 };
 
 export const SOURCES: Record<string, Source> = {
