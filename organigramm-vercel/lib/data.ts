@@ -388,7 +388,7 @@ export const NODES: OrgNode[] = [
 
   // ── Beratungsbüros ──────────────────────────────────────────────────────
   { id: "BB",  label: "Beratungsbüros", role: "Dezentrale Beratung & Vermittlung",
-    description: "Drei Büros (Süd, West, Nord/Ost). Sozialarbeitende werden vom Büropersonal unterstützt.",
+    description: "Drei Büros: Süd, West, Nordost. Sozialarbeitende werden vom Büropersonal unterstützt.",
     verify: "verified", group: "advisory", sources: ["S5"] },
 
   { id: "BBS", label: "Beratungsbüro Süd", role: "Gneisenaustr. 2a, Kreuzberg (Mehringhof)",
@@ -400,9 +400,9 @@ export const NODES: OrgNode[] = [
     description: "Adresse und Leitung: lokal zu prüfen.",
     verify: "inferred", group: "advisory", sources: ["S5"] },
 
-  { id: "BBN", label: "Beratungsbüro Nord/Ost", role: "Beratungsbüro",
-    description: "Adresse und Leitung: lokal zu prüfen.",
-    verify: "inferred", group: "advisory", sources: ["S5"] },
+  { id: "BBN", label: "Beratungsbüro Nordost", role: "Beratungsbüro",
+    description: "Name bestätigt aus Paul's Email-Archiv als „Beratungsbüro Nordost\" (nicht „Nord/Ost\"). Adresse und Leitung: lokal zu prüfen.",
+    verify: "verified", group: "advisory", sources: ["S5"] },
 
   // Rollen in den Beratungsbüros (Mittelbau – ohne Namen)
   { id: "BB_SOZ",   label: "Sozialarbeit (Büro)", role: "Sozialpädagog*innen",

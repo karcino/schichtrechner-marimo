@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-04-22T23:20:23Z",
+  "total_emails": 201,
+  "emails_by_year": {
+    "2025": 15,
+    "2026": 186
+  },
+  "top_from_domains": {
+    "adberlin.org": 197,
+    "betriebsrat-ad.de": 4
+  },
+  "top_to_domains": {
+    "posteo.de": 131,
+    "adberlin.org": 43,
+    "icloud.com": 4,
+    "thomas-kaufmann.com": 1
+  },
+  "subject_keyword_frequency": {
+    "schicht": 30,
+    "einsatz": 18,
+    "einladung": 12,
+    "vertrag": 7,
+    "beatmung": 5,
+    "fortbildung": 5,
+    "bewerbung": 5,
+    "einarbeitung": 4,
+    "basisqualifizierung": 3,
+    "abrechnung": 2,
+    "vorstand": 2,
+    "lohn": 1,
+    "petition": 1
+  },
+  "emails_with_signatures": 0,
+  "emails_with_role_hits": 48,
+  "total_role_hits": 69,
+  "emails_flagged_for_privacy": 124,
+  "unparseable_emails": 0
+}
