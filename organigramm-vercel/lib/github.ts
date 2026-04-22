@@ -22,7 +22,8 @@ type IssueResponse = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  source: "Neue Quelle",
+  "new-source": "Neue Quelle (strukturiert)",
+  source: "Quellen-Hinweis",
   correction: "Korrektur",
   "missing-info": "Fehlende Info",
   comment: "Kommentar",
@@ -50,7 +51,9 @@ export async function createProposalIssue(proposal: ProposalRow): Promise<IssueR
   const submittedAt = m.submitted_at ?? proposal.created_at;
   const dateStr = new Date(submittedAt).toLocaleDateString("de-DE");
 
-  const title = `Proposal (${categoryLabel}): ${excerpt(proposal.content)}`;
+  const title = m.category === "new-source" && m.source_title
+    ? `Proposal (${categoryLabel}): ${m.source_title}`
+    : `Proposal (${categoryLabel}): ${excerpt(proposal.content)}`;
 
   // Structured body als Markdown — so lesbar im GitHub-Web-UI
   const bodyParts: string[] = [
@@ -58,30 +61,42 @@ export async function createProposalIssue(proposal: ProposalRow): Promise<IssueR
     `> **Eingereicht:** ${dateStr} von \`${authorName}\``,
   ];
   if (m.node_id) bodyParts.push(`> **Knoten:** \`${m.node_id}\``);
-  if (m.source_url) bodyParts.push(`> **Quelle:** ${m.source_url}`);
+  if (m.source_url) bodyParts.push(`> **URL:** ${m.source_url}`);
+  if (m.source_title) bodyParts.push(`> **Titel:** ${m.source_title}`);
+  if (m.source_kind) bodyParts.push(`> **Kind:** \`${m.source_kind}\``);
   bodyParts.push("", "## Inhalt", "", proposal.content);
 
-  // Hinweis fuer Integration
-  bodyParts.push(
-    "",
-    "---",
-    "",
-    "### Integration",
-    "",
-    "Wenn angenommen, hier was reinkopiert werden kann je nach Kategorie:",
-    "",
-    "**Neue Quelle →** `organigramm-vercel/lib/sources.ts`: neuen `SOURCES`-Eintrag mit naechster freier `S<n>`-ID, `kind`-Feld passend, `accessed` auf heute setzen. Danach in `data.ts` den Source-IDs-Array des betreffenden Knotens um die neue ID erweitern.",
-    "",
-    "**Korrektur →** direktes Edit in `organigramm-vercel/lib/data.ts` am betreffenden NODES-Eintrag oder RACI-Entry.",
-    "",
-    "**Fehlende Info →** je nach Feld entweder neuen Knoten ergaenzen (data.ts NODES) oder description/role eines bestehenden Knotens erweitern.",
-    "",
-    "**Kommentar →** nur zur Kenntnis — ggf. auf einen Issue-Kommentar antworten und schliessen.",
-    "",
-    "---",
-    "",
-    `OB1-Entry: \`${proposal.id}\``,
-  );
+  // Kategorie-spezifischer Integrations-Hint
+  bodyParts.push("", "---", "", "### Integration", "");
+
+  if (m.category === "new-source" && m.source_title && m.source_url && m.source_kind) {
+    const today = new Date().toISOString().slice(0, 10);
+    bodyParts.push(
+      "Ready-to-paste fuer `organigramm-vercel/lib/sources.ts` — die naechste freie `S<n>`-ID verwenden:",
+      "",
+      "```ts",
+      `  S??: { id: "S??", title: ${JSON.stringify(m.source_title)}, url: ${JSON.stringify(m.source_url)}, accessed: "${today}", kind: "${m.source_kind}" },`,
+      "```",
+      "",
+      m.node_id
+        ? `Danach in \`data.ts\` den \`sources\`-Array des Knotens \`${m.node_id}\` um die neue ID erweitern.`
+        : "Die Quelle ist nicht knoten-gebunden — optional in einem passenden Knoten referenzieren.",
+    );
+  } else {
+    bodyParts.push(
+      "Je nach Kategorie:",
+      "",
+      "**Quellen-Hinweis →** `organigramm-vercel/lib/sources.ts`: neuen `SOURCES`-Eintrag mit naechster freier `S<n>`-ID erstellen, dann in `data.ts` den Knoten-`sources`-Array erweitern.",
+      "",
+      "**Korrektur →** direktes Edit in `organigramm-vercel/lib/data.ts` am betreffenden NODES-Eintrag oder RACI-Entry.",
+      "",
+      "**Fehlende Info →** je nach Feld entweder neuen Knoten ergaenzen (data.ts NODES) oder description/role eines bestehenden Knotens erweitern.",
+      "",
+      "**Kommentar →** nur zur Kenntnis — ggf. auf einen Issue-Kommentar antworten und schliessen.",
+    );
+  }
+
+  bodyParts.push("", "---", "", `OB1-Entry: \`${proposal.id}\``);
 
   const body = bodyParts.join("\n");
 

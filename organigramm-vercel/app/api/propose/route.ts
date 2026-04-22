@@ -19,10 +19,16 @@
 import { NextResponse } from "next/server";
 
 const CATEGORIES = new Set([
-  "source",       // "Ich habe eine neue Quelle fuer Knoten X"
+  "source",       // freitextlich: "Ich habe eine neue Quelle fuer Knoten X"
+  "new-source",   // strukturiert: url + title + kind + node_id (Sub-Projekt E-FULL)
   "correction",   // "Der Rollen-Name stimmt nicht, richtig ist ..."
   "missing-info", // "Knoten X fehlt Info zu Y"
   "comment",      // Genereller Kommentar / Beobachtung
+]);
+
+const SOURCE_KINDS = new Set([
+  "primary", "secondary", "archive", "legal", "internal",
+  "email-private", "shift-agg", "osint-register", "financial-public", "ob1-synthesis",
 ]);
 
 // Client-side max lengths — bitte consistent mit ProposalForm halten
@@ -60,6 +66,9 @@ export async function POST(req: Request) {
     content,
     source_url,
     node_id,
+    // new-source-spezifische Felder (nur bei category="new-source")
+    source_title,
+    source_kind,
   } = payload as Record<string, unknown>;
 
   if (clientPassword !== password) {
@@ -86,9 +95,34 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "node_id muss String sein." }, { status: 400 });
   }
 
+  // new-source-Kategorie: strukturierte Felder sind PFLICHT
+  if (category === "new-source") {
+    if (typeof source_url !== "string" || source_url.trim().length === 0) {
+      return NextResponse.json({ error: "URL ist Pflicht bei new-source." }, { status: 400 });
+    }
+    if (typeof source_title !== "string" || source_title.trim().length === 0) {
+      return NextResponse.json({ error: "Titel ist Pflicht bei new-source." }, { status: 400 });
+    }
+    if (typeof source_kind !== "string" || !SOURCE_KINDS.has(source_kind)) {
+      return NextResponse.json({ error: "Unbekanntes kind bei new-source." }, { status: 400 });
+    }
+    // node_id optional auch hier — Quelle kann global sein, nicht knoten-gebunden
+  }
+
   // An OB1 weiterreichen. capture_thought generiert Embedding + Metadata.
   // Extra-Metadata: unsere eigenen Tags, damit Paul die Proposals spaeter
   // gezielt filtern kann via list_thoughts oder Supabase-Query.
+  // Fuer strukturiertes new-source bauen wir einen Marker-Text, der in der
+  // OB1-Volltext-Semantiksuche wiederfindbar ist, und legen zusaetzlich die
+  // strukturierten Felder in metadata.
+  const contentPrefix = `[Vorschlag von ${name.trim()}${node_id ? ` zu Knoten ${node_id}` : ""}] [${category}]`;
+  let contentBody = content.trim();
+  if (category === "new-source") {
+    contentBody = `${source_title as string}\n${source_url as string}\n(kind=${source_kind as string})\n\n${contentBody}`;
+  } else if (source_url) {
+    contentBody = `${contentBody}\n\nQuelle: ${source_url}`;
+  }
+
   const ob1Body = {
     jsonrpc: "2.0",
     id: Date.now(),
@@ -96,7 +130,7 @@ export async function POST(req: Request) {
     params: {
       name: "capture_thought",
       arguments: {
-        content: `[Vorschlag von ${name.trim()}${node_id ? ` zu Knoten ${node_id}` : ""}] [${category}] ${content.trim()}${source_url ? `\n\nQuelle: ${source_url}` : ""}`,
+        content: `${contentPrefix} ${contentBody}`,
         metadata: {
           kind: "edit-proposal",
           status: "pending",
@@ -105,6 +139,8 @@ export async function POST(req: Request) {
           category,
           node_id: node_id ?? null,
           source_url: source_url ?? null,
+          source_title: category === "new-source" ? (source_title as string) : null,
+          source_kind: category === "new-source" ? (source_kind as string) : null,
           submitted_at: new Date().toISOString(),
         },
       },

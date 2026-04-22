@@ -44,6 +44,8 @@ export type ProposalRow = {
     category?: string;
     node_id?: string | null;
     source_url?: string | null;
+    source_title?: string | null;
+    source_kind?: string | null;
     submitted_at?: string;
     decided_at?: string;
     decided_by?: string;

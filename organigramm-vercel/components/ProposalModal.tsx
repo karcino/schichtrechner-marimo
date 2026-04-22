@@ -20,10 +20,21 @@ const PW_KEY = "adberlin-editor-pw";
 const NAME_KEY = "adberlin-editor-name";
 
 const CATEGORIES: { id: string; label: string; hint: string }[] = [
-  { id: "source", label: "Neue Quelle", hint: "Ich habe eine Quelle fuer einen Knoten, die bisher fehlt." },
+  { id: "new-source", label: "🔖 Neue Quelle (strukturiert)", hint: "URL, Titel, Quellenart + optional Knoten. Ergibt einen direkt einsetzbaren SOURCES-Eintrag." },
+  { id: "source", label: "Quellen-Hinweis (Freitext)", hint: "Ich habe irgendwo eine Quelle gesehen, ist aber noch nicht final formatiert." },
   { id: "correction", label: "Korrektur", hint: "Ein Name, eine Rolle oder eine Beziehung stimmt nicht." },
   { id: "missing-info", label: "Fehlende Info", hint: "Ein Knoten oder Prozess ist unvollstaendig." },
   { id: "comment", label: "Kommentar / Hinweis", hint: "Beobachtung, Frage oder Anregung ohne konkreten Edit." },
+];
+
+const SOURCE_KIND_OPTIONS: { id: string; label: string }[] = [
+  { id: "primary", label: "primary — offizielle Website" },
+  { id: "secondary", label: "secondary — Verzeichnis, Dritt-Quelle" },
+  { id: "archive", label: "archive — Archivierte/veraltete Seite" },
+  { id: "legal", label: "legal — Gesetz, Tarifvertrag, BV" },
+  { id: "osint-register", label: "osint-register — Vereins-/Handels-Register" },
+  { id: "financial-public", label: "financial-public — Bundesanzeiger, Jahresabschluss" },
+  { id: "internal", label: "internal — Interne Quelle (selten)" },
 ];
 
 type Step = "password" | "name" | "form" | "success" | "error";
@@ -35,6 +46,8 @@ export default function ProposalModal({ open, onClose, initialNodeId }: Props) {
   const [category, setCategory] = useState<string>("comment");
   const [content, setContent] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [sourceTitle, setSourceTitle] = useState("");
+  const [sourceKind, setSourceKind] = useState("primary");
   const [nodeId, setNodeId] = useState(initialNodeId ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,7 +97,15 @@ export default function ProposalModal({ open, onClose, initialNodeId }: Props) {
 
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (content.trim().length === 0) return;
+    // new-source: Pflichtfelder URL + Titel + Kind
+    if (category === "new-source") {
+      if (sourceUrl.trim().length === 0 || sourceTitle.trim().length === 0) {
+        setErrorMessage("Bei 'Neue Quelle' sind URL + Titel Pflicht.");
+        return;
+      }
+    } else if (content.trim().length === 0) {
+      return;
+    }
     setSubmitting(true);
     setErrorMessage(null);
     try {
@@ -95,8 +116,10 @@ export default function ProposalModal({ open, onClose, initialNodeId }: Props) {
           password,
           name: name.trim(),
           category,
-          content: content.trim(),
+          content: content.trim() || "(keine zusaetzliche Beschreibung)",
           source_url: sourceUrl.trim() || undefined,
+          source_title: category === "new-source" ? sourceTitle.trim() : undefined,
+          source_kind: category === "new-source" ? sourceKind : undefined,
           node_id: nodeId.trim() || undefined,
         }),
       });
@@ -108,6 +131,7 @@ export default function ProposalModal({ open, onClose, initialNodeId }: Props) {
         setStep("success");
         setContent("");
         setSourceUrl("");
+        setSourceTitle("");
       } else {
         setErrorMessage(data?.error ?? "Unbekannter Fehler.");
         if (res.status === 401) {
@@ -226,50 +250,134 @@ export default function ProposalModal({ open, onClose, initialNodeId }: Props) {
               </div>
             </div>
 
-            <div>
-              <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
-                Beschreibung <span className="text-[10px]">({content.length}/2000)</span>
-              </label>
-              <textarea
-                autoFocus
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={CATEGORIES.find((c) => c.id === category)?.hint}
-                maxLength={2000}
-                rows={4}
-                className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
+            {category === "new-source" ? (
+              <>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    URL <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="url"
+                    autoFocus
+                    value={sourceUrl}
+                    onChange={(e) => setSourceUrl(e.target.value)}
+                    placeholder="https://..."
+                    required
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Titel <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={sourceTitle}
+                    onChange={(e) => setSourceTitle(e.target.value)}
+                    placeholder="z.B. 'Paritaetischer Berlin — Mitgliederliste'"
+                    maxLength={200}
+                    required
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Quellenart <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    value={sourceKind}
+                    onChange={(e) => setSourceKind(e.target.value)}
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  >
+                    {SOURCE_KIND_OPTIONS.map((k) => (
+                      <option key={k.id} value={k.id}>{k.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Knoten-ID (optional) — zu welchem Knoten gehoert die Quelle
+                  </label>
+                  <input
+                    type="text"
+                    value={nodeId}
+                    onChange={(e) => setNodeId(e.target.value)}
+                    placeholder="z.B. VS, BB_COORD, NLW"
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Kontext (optional) <span className="text-[10px]">({content.length}/2000)</span>
+                  </label>
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Warum ist diese Quelle relevant? Welches Feld belegt sie?"
+                    maxLength={2000}
+                    rows={3}
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Beschreibung <span className="text-[10px]">({content.length}/2000)</span>
+                  </label>
+                  <textarea
+                    autoFocus
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder={CATEGORIES.find((c) => c.id === category)?.hint}
+                    maxLength={2000}
+                    rows={4}
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
 
-            <div>
-              <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
-                Knoten-ID (optional) — wenn es um einen spezifischen Knoten geht
-              </label>
-              <input
-                type="text"
-                value={nodeId}
-                onChange={(e) => setNodeId(e.target.value)}
-                placeholder="z.B. VS, BB_COORD, NLW"
-                className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Knoten-ID (optional) — wenn es um einen spezifischen Knoten geht
+                  </label>
+                  <input
+                    type="text"
+                    value={nodeId}
+                    onChange={(e) => setNodeId(e.target.value)}
+                    placeholder="z.B. VS, BB_COORD, NLW"
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
 
-            <div>
-              <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
-                Quelle/URL (optional) — wenn du einen Link als Beleg hast
-              </label>
-              <input
-                type="url"
-                value={sourceUrl}
-                onChange={(e) => setSourceUrl(e.target.value)}
-                placeholder="https://..."
-                className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
+                <div>
+                  <label className="text-xs text-ink-soft dark:text-paper/70 block mb-1">
+                    Quelle/URL (optional) — wenn du einen Link als Beleg hast
+                  </label>
+                  <input
+                    type="url"
+                    value={sourceUrl}
+                    onChange={(e) => setSourceUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full border border-ink-soft/20 rounded-lg px-3 py-2 bg-paper dark:bg-ink text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
+              </>
+            )}
 
+            {errorMessage && step === "form" && (
+              <div className="text-xs text-danger bg-danger-soft px-3 py-2 rounded">
+                {errorMessage}
+              </div>
+            )}
             <button
               type="submit"
-              disabled={submitting || content.trim().length === 0}
+              disabled={
+                submitting ||
+                (category === "new-source"
+                  ? sourceUrl.trim().length === 0 || sourceTitle.trim().length === 0
+                  : content.trim().length === 0)
+              }
               className="w-full bg-accent text-white rounded-lg py-2 font-medium hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Wird gesendet…" : "Absenden"}

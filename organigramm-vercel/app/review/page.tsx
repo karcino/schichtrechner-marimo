@@ -156,11 +156,29 @@ function ProposalCard({ proposal, reviewKey }: { proposal: ProposalRow; reviewKe
         <time className="text-[11px] text-ink-soft/60 font-mono">{formattedDate}</time>
       </div>
 
+      {m.category === "new-source" && m.source_title && m.source_url && m.source_kind && (
+        <div className="bg-paper dark:bg-ink rounded-lg p-3 mb-3 border border-ink-soft/10 text-sm">
+          <div className="font-semibold text-ink dark:text-paper">{m.source_title}</div>
+          <a
+            href={m.source_url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-accent underline text-xs break-all"
+          >
+            {m.source_url}
+          </a>
+          <div className="text-[11px] text-ink-soft mt-1 font-mono">
+            kind: <span className="text-ink">{m.source_kind}</span>
+            {m.node_id && <> · für <span className="text-ink">{m.node_id}</span></>}
+          </div>
+        </div>
+      )}
+
       <div className="text-sm text-ink dark:text-paper whitespace-pre-wrap mb-3">
         {proposal.content}
       </div>
 
-      {m.source_url && (
+      {m.source_url && m.category !== "new-source" && (
         <div className="text-xs mb-3">
           <span className="text-ink-soft">Quelle: </span>
           <a
