@@ -146,14 +146,19 @@ class SignatureRecord:
 class PersonRecord:
     """Aggregiert aus allen Emails, in denen eine Person erwähnt wird."""
     name: str
-    role_guesses: list[str] = field(default_factory=list)       # Deduplizierte
+    role_guesses: list[str] = field(default_factory=list)
     phone_candidates: list[str] = field(default_factory=list)
     email_candidates: list[str] = field(default_factory=list)
     buero_guesses: list[str] = field(default_factory=list)
     occurrences: int = 0
     first_seen: str | None = None
     last_seen: str | None = None
-    sample_closing_line: str | None = None   # Debug-Hilfe: welcher Closing-Phrase?
+    sample_closing_line: str | None = None
+    # Erweiterungen (v3) für reichere UI
+    in_count: int = 0                                   # von Person empfangen (du hast Mail bekommen)
+    out_count: int = 0                                  # an Person gesendet (du hast Mail geschrieben)
+    top_keywords: list[tuple[str, int]] = field(default_factory=list)  # [(keyword, count), ...]
+    co_mentioned_with: list[tuple[str, int]] = field(default_factory=list)  # andere Personen im selben Thread
 
 
 @dataclass
@@ -162,6 +167,7 @@ class ASNRecord:
     occurrences: int = 0
     contexts_count: int = 0        # in wie vielen Mails gesehen
     associated_bueros: list[str] = field(default_factory=list)   # welche Büros erwähnen es?
+    associated_persons: list[tuple[str, int]] = field(default_factory=list)   # [(Name, count)] sortiert nach count
     first_seen: str | None = None
     last_seen: str | None = None
 
@@ -383,9 +389,25 @@ class AnalysisResult:
     stats: dict = field(default_factory=dict)
 
 
+def direction_from_path(p: Path) -> str:
+    """Liest Richtung aus Pfad-Bestandteilen (aus/ein) — überschreibt Domain-Heuristik.
+
+    Paul's Ordner-Konvention: Mail/aus/ = gesendete, Mail/ein/ = empfangene.
+    Mail/ein / (mit Trailing-Space) wird auch erkannt.
+    """
+    for part in p.parts:
+        normalized = part.strip().lower()
+        if normalized == "aus":
+            return "out"
+        if normalized == "ein":
+            return "in"
+    return ""
+
+
 def analyze(input_dir: Path) -> AnalysisResult:
     result = AnalysisResult()
-    eml_files = sorted(input_dir.glob("*.eml"))
+    # Rekursiv — alle *.eml in input_dir und Unterordnern
+    eml_files = sorted(input_dir.rglob("*.eml"))
     if not eml_files:
         raise FileNotFoundError(f"Keine *.eml-Dateien in {input_dir}")
 
@@ -411,7 +433,12 @@ def analyze(input_dir: Path) -> AnalysisResult:
 
         from_domain = extract_domain(headers["from"]) or ""
         to_domain = extract_domain(headers["to"]) or ""
-        direction = "in" if "adberlin" in from_domain else ("out" if "adberlin" in to_domain else "unknown")
+        # Richtung: bevorzugt aus Ordner-Path (aus/ein), Fallback auf Domain-Heuristik
+        path_dir = direction_from_path(eml_path)
+        if path_dir:
+            direction = path_dir
+        else:
+            direction = "in" if "adberlin" in from_domain else ("out" if "adberlin" in to_domain else "unknown")
 
         subject = headers["subject"]
         subj_hash = sha256_hex(subject[:40])
@@ -458,6 +485,11 @@ def analyze(input_dir: Path) -> AnalysisResult:
                     from_domain=from_domain,
                     to_domain=to_domain,
                 ))
+                # Erweiterte Per-Person-Stats
+                if direction == "in":
+                    p.in_count += 1
+                elif direction == "out":
+                    p.out_count += 1
 
         # ── ASN-Kürzel ────────────────────────────────────────────────────
         # Suche Kürzel sowohl im Subject als auch im Body (begrenzt)
@@ -465,7 +497,9 @@ def analyze(input_dir: Path) -> AnalysisResult:
         # Body nur in den ersten 800 Chars scannen — Signaturen am Ende könnten
         # zu False-Positives führen (Nachnamen, Adressen mit CamelCase-Teilen)
         kuerzel_candidates += extract_asn_kuerzel(body[:800])
-        for k in set(kuerzel_candidates):
+        unique_kuerzel_this_email = set(kuerzel_candidates)
+        signer_name = sig_record.name if sig_record and sig_record.name else None
+        for k in unique_kuerzel_this_email:
             if k not in result.asns:
                 result.asns[k] = ASNRecord(
                     kuerzel=k,
@@ -477,12 +511,56 @@ def analyze(input_dir: Path) -> AnalysisResult:
             a.contexts_count += 1
             if sig_record and sig_record.buero_hint and sig_record.buero_hint not in a.associated_bueros:
                 a.associated_bueros.append(sig_record.buero_hint)
+            # ASN ↔ Person Association: wenn Email-Signer bekannt + Kürzel im Body/Subject
+            if signer_name:
+                # associated_persons ist list[tuple(name, count)], wir nutzen dict-Aggregation
+                # und serialisieren am Ende
+                if not hasattr(a, "_person_counter"):
+                    a._person_counter = Counter()  # type: ignore[attr-defined]
+                a._person_counter[signer_name] += 1  # type: ignore[attr-defined]
             if date_iso:
                 if not a.first_seen or date_iso < a.first_seen:
                     a.first_seen = date_iso
                 if not a.last_seen or date_iso > a.last_seen:
                     a.last_seen = date_iso
             stats["asn_occurrences"] += 1
+
+    # Post-Processing: top_keywords + co_mentioned_with pro Person
+    # Sammle Keywords + Co-Mentions pro Person aus comm_log
+    for person_name, entries in result.comm_log_per_person.items():
+        if person_name not in result.persons:
+            continue
+        kw_counter: Counter[str] = Counter()
+        for e in entries:
+            if e.subject_keyword != "other":
+                kw_counter[e.subject_keyword] += 1
+        result.persons[person_name].top_keywords = kw_counter.most_common(5)
+
+    # Co-Mentions: wenn zwei Personen im selben Subject_hash auftauchen (same thread)
+    # → Subject_hash-basierte Gruppierung
+    thread_to_persons: dict[str, list[str]] = defaultdict(list)
+    for person_name, entries in result.comm_log_per_person.items():
+        for e in entries:
+            key = f"{e.date}::{e.subject_hash}"
+            thread_to_persons[key].append(person_name)
+    co_mention_counter: dict[str, Counter[str]] = defaultdict(Counter)
+    for _thread_id, people in thread_to_persons.items():
+        unique = list(set(people))
+        for i, person_a in enumerate(unique):
+            for person_b in unique[i+1:]:
+                co_mention_counter[person_a][person_b] += 1
+                co_mention_counter[person_b][person_a] += 1
+    for person_name, counter in co_mention_counter.items():
+        if person_name in result.persons:
+            result.persons[person_name].co_mentioned_with = counter.most_common(5)
+
+    # Serialize ASN._person_counter to ASNRecord.associated_persons
+    for a in result.asns.values():
+        counter = getattr(a, "_person_counter", None)
+        if counter:
+            a.associated_persons = counter.most_common(5)
+            # Entferne das private Attribut vor Serialisierung
+            delattr(a, "_person_counter")
 
     # stats: emails_by_year als Dict
     stats["emails_by_year"] = dict(sorted(stats["emails_by_year"].items()))
