@@ -60,6 +60,19 @@ Floating-Button unten rechts → Passwort → Name → Form (Kategorie + Content
 
 Kein Accounts-System, kein Tracking. Name bleibt in `localStorage`, Passwort wird nach erstem erfolgreichen Submit auch gecached.
 
+## Private Ansicht (Paul-only, lokal)
+
+`/private?key=<PRIVATE_PASSWORD>` rendert server-seitig die drei gitignored Private-JSONs aus `organigramm/raw/`:
+
+- **Büro-Organigramm** — 28 Personen aus Email-Signaturen, gruppiert nach Büro (Einsatzstelle, BBS, BBW, BBN, BR, Ohne-Zuordnung), mit Rolle + Telefon + Email
+- **ASN-Übersicht** — 10 Client-Kürzel (z.B. "RaHi", "EnDem") mit Häufigkeit + Büro-Kontext, keine Vollnamen
+- **Kommunikations-Protokoll** — Dropdown-Auswahl Person → chronologische Liste aller Mail-Interaktionen (Datum, Richtung, Subject-Keyword, Subject-Hash), **keine Inhalte**
+
+Erfordert:
+- `PRIVATE_PASSWORD` Env-Var gesetzt (separat von `EDIT_PASSWORD` und `REVIEW_PASSWORD`)
+- Private-JSONs lokal in `organigramm/raw/persons-private.json` etc. (Script: `organigramm/ingest/email_persons_extract.py`)
+- Lokaler Dev-Server (`npm run dev:private` oder normales `dev`) — auf Vercel-Deploy sind die Files nicht verfügbar, die Seite zeigt dann nur "private data missing"
+
 ## Proposal-Review (Paul-only)
 
 `/review?key=<REVIEW_PASSWORD>` zeigt alle Proposals gefiltert nach Status (`pending`, `accepted`, `rejected`, `later`). Accept/Reject/Later-Buttons aktualisieren das Status-Metadata-Feld direkt in der Supabase-DB.
