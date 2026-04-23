@@ -24,6 +24,9 @@ export type ASNRecord = {
   occurrences: number;
   contexts_count: number;
   associated_bueros: string[];
+  /** [Name, count] absteigend sortiert — wer hat Mails mit Bezug auf diesen
+   *  ASN unterschrieben. Primär-Kontakt = associated_persons[0]. */
+  associated_persons?: Array<[string, number]>;
   first_seen: string | null;
   last_seen: string | null;
 };
@@ -37,14 +40,26 @@ export type CommunicationEntry = {
   to_domain: string;
 };
 
+/** Paul's eigene Schichten pro ASN — Quelle: schichtplaner_allinone.html. */
+export type PaulShiftStats = {
+  kuerzel: string;
+  shifts: number;
+  hours: number;
+  first_date: string | null;
+  last_date: string | null;
+  dates: string[];
+};
+
 export type PrivateDataset = {
   persons: PersonRecord[];
   asns: ASNRecord[];
   commLogByPerson: Record<string, CommunicationEntry[]>;
+  paulShiftsByAsn: Record<string, PaulShiftStats>;
   status: {
     personsFound: boolean;
     asnsFound: boolean;
     commLogFound: boolean;
+    paulShiftsFound: boolean;
     rawDirAbsolute: string;
   };
 };

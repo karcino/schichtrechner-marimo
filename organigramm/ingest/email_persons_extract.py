@@ -167,6 +167,7 @@ class ASNRecord:
     occurrences: int = 0
     contexts_count: int = 0        # in wie vielen Mails gesehen
     associated_bueros: list[str] = field(default_factory=list)   # welche Büros erwähnen es?
+    associated_persons: list[tuple[str, int]] = field(default_factory=list)   # [(Name, count)] sortiert nach count
     first_seen: str | None = None
     last_seen: str | None = None
 
@@ -496,7 +497,9 @@ def analyze(input_dir: Path) -> AnalysisResult:
         # Body nur in den ersten 800 Chars scannen — Signaturen am Ende könnten
         # zu False-Positives führen (Nachnamen, Adressen mit CamelCase-Teilen)
         kuerzel_candidates += extract_asn_kuerzel(body[:800])
-        for k in set(kuerzel_candidates):
+        unique_kuerzel_this_email = set(kuerzel_candidates)
+        signer_name = sig_record.name if sig_record and sig_record.name else None
+        for k in unique_kuerzel_this_email:
             if k not in result.asns:
                 result.asns[k] = ASNRecord(
                     kuerzel=k,
@@ -508,6 +511,13 @@ def analyze(input_dir: Path) -> AnalysisResult:
             a.contexts_count += 1
             if sig_record and sig_record.buero_hint and sig_record.buero_hint not in a.associated_bueros:
                 a.associated_bueros.append(sig_record.buero_hint)
+            # ASN ↔ Person Association: wenn Email-Signer bekannt + Kürzel im Body/Subject
+            if signer_name:
+                # associated_persons ist list[tuple(name, count)], wir nutzen dict-Aggregation
+                # und serialisieren am Ende
+                if not hasattr(a, "_person_counter"):
+                    a._person_counter = Counter()  # type: ignore[attr-defined]
+                a._person_counter[signer_name] += 1  # type: ignore[attr-defined]
             if date_iso:
                 if not a.first_seen or date_iso < a.first_seen:
                     a.first_seen = date_iso
@@ -543,6 +553,14 @@ def analyze(input_dir: Path) -> AnalysisResult:
     for person_name, counter in co_mention_counter.items():
         if person_name in result.persons:
             result.persons[person_name].co_mentioned_with = counter.most_common(5)
+
+    # Serialize ASN._person_counter to ASNRecord.associated_persons
+    for a in result.asns.values():
+        counter = getattr(a, "_person_counter", None)
+        if counter:
+            a.associated_persons = counter.most_common(5)
+            # Entferne das private Attribut vor Serialisierung
+            delattr(a, "_person_counter")
 
     # stats: emails_by_year als Dict
     stats["emails_by_year"] = dict(sorted(stats["emails_by_year"].items()))

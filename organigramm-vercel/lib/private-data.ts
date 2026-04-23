@@ -13,11 +13,18 @@ import type {
   PersonRecord,
   ASNRecord,
   CommunicationEntry,
+  PaulShiftStats,
   PrivateDataset,
 } from "./private-data-types";
 
 // Re-export types for convenience
-export type { PersonRecord, ASNRecord, CommunicationEntry, PrivateDataset } from "./private-data-types";
+export type {
+  PersonRecord,
+  ASNRecord,
+  CommunicationEntry,
+  PaulShiftStats,
+  PrivateDataset,
+} from "./private-data-types";
 export { BUERO_LABELS, groupPersonsByBuero } from "./private-data-types";
 
 const RAW_DIR_REL = ["..", "organigramm", "raw"];
@@ -44,15 +51,25 @@ export async function loadPrivateDataset(): Promise<PrivateDataset> {
   const commData = await readJsonIfExists<{
     per_person: Record<string, CommunicationEntry[]>;
   }>("communication-log-private.json");
+  const shiftsData = await readJsonIfExists<{
+    asn_shift_stats: PaulShiftStats[];
+  }>("paul-shifts-by-asn-private.json");
+
+  const paulShiftsByAsn: Record<string, PaulShiftStats> = {};
+  for (const s of shiftsData?.asn_shift_stats ?? []) {
+    paulShiftsByAsn[s.kuerzel] = s;
+  }
 
   return {
     persons: personsData?.persons ?? [],
     asns: asnsData?.asns ?? [],
     commLogByPerson: commData?.per_person ?? {},
+    paulShiftsByAsn,
     status: {
       personsFound: personsData !== null,
       asnsFound: asnsData !== null,
       commLogFound: commData !== null,
+      paulShiftsFound: shiftsData !== null,
       rawDirAbsolute: rawDirAbs,
     },
   };

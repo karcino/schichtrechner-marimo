@@ -73,6 +73,7 @@ export default function PrivateTabs({ dataset }: { dataset: PrivateDataset }) {
         <PrivateEmailOrgView
           persons={dataset.persons}
           asns={dataset.asns}
+          paulShiftsByAsn={dataset.paulShiftsByAsn}
           onPersonClick={handlePersonClick}
         />
       )}
@@ -82,7 +83,13 @@ export default function PrivateTabs({ dataset }: { dataset: PrivateDataset }) {
           onPersonClick={handlePersonClick}
         />
       )}
-      {tab === "asn" && <PrivateASNView asns={dataset.asns} />}
+      {tab === "asn" && (
+        <PrivateASNView
+          asns={dataset.asns}
+          paulShiftsByAsn={dataset.paulShiftsByAsn}
+          onPersonClick={handlePersonClick}
+        />
+      )}
       {tab === "comm" && (
         <PrivateCommLogView
           persons={dataset.persons}
