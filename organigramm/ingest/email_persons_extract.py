@@ -146,14 +146,19 @@ class SignatureRecord:
 class PersonRecord:
     """Aggregiert aus allen Emails, in denen eine Person erwähnt wird."""
     name: str
-    role_guesses: list[str] = field(default_factory=list)       # Deduplizierte
+    role_guesses: list[str] = field(default_factory=list)
     phone_candidates: list[str] = field(default_factory=list)
     email_candidates: list[str] = field(default_factory=list)
     buero_guesses: list[str] = field(default_factory=list)
     occurrences: int = 0
     first_seen: str | None = None
     last_seen: str | None = None
-    sample_closing_line: str | None = None   # Debug-Hilfe: welcher Closing-Phrase?
+    sample_closing_line: str | None = None
+    # Erweiterungen (v3) für reichere UI
+    in_count: int = 0                                   # von Person empfangen (du hast Mail bekommen)
+    out_count: int = 0                                  # an Person gesendet (du hast Mail geschrieben)
+    top_keywords: list[tuple[str, int]] = field(default_factory=list)  # [(keyword, count), ...]
+    co_mentioned_with: list[tuple[str, int]] = field(default_factory=list)  # andere Personen im selben Thread
 
 
 @dataclass
@@ -383,9 +388,25 @@ class AnalysisResult:
     stats: dict = field(default_factory=dict)
 
 
+def direction_from_path(p: Path) -> str:
+    """Liest Richtung aus Pfad-Bestandteilen (aus/ein) — überschreibt Domain-Heuristik.
+
+    Paul's Ordner-Konvention: Mail/aus/ = gesendete, Mail/ein/ = empfangene.
+    Mail/ein / (mit Trailing-Space) wird auch erkannt.
+    """
+    for part in p.parts:
+        normalized = part.strip().lower()
+        if normalized == "aus":
+            return "out"
+        if normalized == "ein":
+            return "in"
+    return ""
+
+
 def analyze(input_dir: Path) -> AnalysisResult:
     result = AnalysisResult()
-    eml_files = sorted(input_dir.glob("*.eml"))
+    # Rekursiv — alle *.eml in input_dir und Unterordnern
+    eml_files = sorted(input_dir.rglob("*.eml"))
     if not eml_files:
         raise FileNotFoundError(f"Keine *.eml-Dateien in {input_dir}")
 
@@ -411,7 +432,12 @@ def analyze(input_dir: Path) -> AnalysisResult:
 
         from_domain = extract_domain(headers["from"]) or ""
         to_domain = extract_domain(headers["to"]) or ""
-        direction = "in" if "adberlin" in from_domain else ("out" if "adberlin" in to_domain else "unknown")
+        # Richtung: bevorzugt aus Ordner-Path (aus/ein), Fallback auf Domain-Heuristik
+        path_dir = direction_from_path(eml_path)
+        if path_dir:
+            direction = path_dir
+        else:
+            direction = "in" if "adberlin" in from_domain else ("out" if "adberlin" in to_domain else "unknown")
 
         subject = headers["subject"]
         subj_hash = sha256_hex(subject[:40])
@@ -458,6 +484,11 @@ def analyze(input_dir: Path) -> AnalysisResult:
                     from_domain=from_domain,
                     to_domain=to_domain,
                 ))
+                # Erweiterte Per-Person-Stats
+                if direction == "in":
+                    p.in_count += 1
+                elif direction == "out":
+                    p.out_count += 1
 
         # ── ASN-Kürzel ────────────────────────────────────────────────────
         # Suche Kürzel sowohl im Subject als auch im Body (begrenzt)
@@ -483,6 +514,35 @@ def analyze(input_dir: Path) -> AnalysisResult:
                 if not a.last_seen or date_iso > a.last_seen:
                     a.last_seen = date_iso
             stats["asn_occurrences"] += 1
+
+    # Post-Processing: top_keywords + co_mentioned_with pro Person
+    # Sammle Keywords + Co-Mentions pro Person aus comm_log
+    for person_name, entries in result.comm_log_per_person.items():
+        if person_name not in result.persons:
+            continue
+        kw_counter: Counter[str] = Counter()
+        for e in entries:
+            if e.subject_keyword != "other":
+                kw_counter[e.subject_keyword] += 1
+        result.persons[person_name].top_keywords = kw_counter.most_common(5)
+
+    # Co-Mentions: wenn zwei Personen im selben Subject_hash auftauchen (same thread)
+    # → Subject_hash-basierte Gruppierung
+    thread_to_persons: dict[str, list[str]] = defaultdict(list)
+    for person_name, entries in result.comm_log_per_person.items():
+        for e in entries:
+            key = f"{e.date}::{e.subject_hash}"
+            thread_to_persons[key].append(person_name)
+    co_mention_counter: dict[str, Counter[str]] = defaultdict(Counter)
+    for _thread_id, people in thread_to_persons.items():
+        unique = list(set(people))
+        for i, person_a in enumerate(unique):
+            for person_b in unique[i+1:]:
+                co_mention_counter[person_a][person_b] += 1
+                co_mention_counter[person_b][person_a] += 1
+    for person_name, counter in co_mention_counter.items():
+        if person_name in result.persons:
+            result.persons[person_name].co_mentioned_with = counter.most_common(5)
 
     # stats: emails_by_year als Dict
     stats["emails_by_year"] = dict(sorted(stats["emails_by_year"].items()))

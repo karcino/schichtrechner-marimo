@@ -13,6 +13,10 @@ export type PersonRecord = {
   first_seen: string | null;
   last_seen: string | null;
   sample_closing_line: string | null;
+  in_count?: number;                                 // von Person erhalten
+  out_count?: number;                                // an Person gesendet
+  top_keywords?: Array<[string, number]>;            // [['schicht', 8], ...]
+  co_mentioned_with?: Array<[string, number]>;       // andere Personen (meist leer, s. script)
 };
 
 export type ASNRecord = {

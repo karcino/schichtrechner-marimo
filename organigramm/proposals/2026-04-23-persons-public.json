@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-04-22T23:41:40+00:00",
-  "total_emails": 201,
-  "emails_with_signature_found": 176,
-  "emails_with_parsed_name": 140,
+  "generated_at": "2026-04-23T00:15:43+00:00",
+  "total_emails": 306,
+  "emails_with_signature_found": 281,
+  "emails_with_parsed_name": 176,
   "distinct_persons_identified": 28,
-  "distinct_asn_kuerzel_identified": 10,
-  "total_asn_occurrences": 55,
+  "distinct_asn_kuerzel_identified": 12,
+  "total_asn_occurrences": 92,
   "emails_by_year": {
-    "2025": 15,
-    "2026": 186
+    "2025": 22,
+    "2026": 284
   },
   "persons_with_known_role": 19,
   "persons_with_known_phone": 7,

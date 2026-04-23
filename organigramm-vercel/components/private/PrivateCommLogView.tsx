@@ -6,9 +6,10 @@ import type { CommunicationEntry, PersonRecord } from "@/lib/private-data-types"
 type Props = {
   persons: PersonRecord[];
   commLogByPerson: Record<string, CommunicationEntry[]>;
+  preselected?: string;
 };
 
-export default function PrivateCommLogView({ persons, commLogByPerson }: Props) {
+export default function PrivateCommLogView({ persons, commLogByPerson, preselected }: Props) {
   const personNames = useMemo(() => {
     return persons
       .slice()
@@ -16,7 +17,11 @@ export default function PrivateCommLogView({ persons, commLogByPerson }: Props) 
       .map((p) => p.name);
   }, [persons]);
 
-  const [selected, setSelected] = useState<string>(personNames[0] ?? "");
+  // Derived-state-Pattern: localOverride > preselected (von außen) > default.
+  // Kein setState-in-render.
+  const [localOverride, setLocalOverride] = useState<string | null>(null);
+  const selected = localOverride ?? preselected ?? personNames[0] ?? "";
+  const setSelected = (name: string) => setLocalOverride(name);
 
   if (personNames.length === 0) {
     return (
